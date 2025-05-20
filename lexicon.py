@@ -24,10 +24,10 @@ def isString(element):
 
 # Check if an element is an operator (single character)
 def isOperator(element):
-    return re.match(r"^[+\-*/<>&.@/:=~|\$\[\]!\#\%\^_\{\}]", element)
-
+    return re.match(r'^[+\-*<>&.@/:=˜|$!#%ˆ_\[\]{}"`\?]', element)
+      # Check if an element is a double operator (two characters)
 # Check if an element is a punctuation character
-def isPunctuation(element):
+def isPunction(element):
     return re.match(r'^[\(\)\;\,]', element)
 
 # Check if an element is a comment (starts with //)
@@ -94,9 +94,9 @@ def tokenize(lines, tokens):
              continue
 
           # Punctuation
-          match = isPunctuation(line)
+          match = isPunction(line)
           if match:
-             tokens.append(Token("PUNCTUATION", match.group(), line_number))
+             tokens.append(Token(match.group(), match.group(), line_number))
              line = line[match.end():]
              continue
 
