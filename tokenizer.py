@@ -52,7 +52,22 @@ class Token:
 
 # Tokenize input lines into a list of tokens
 def tokenize(lines, tokens):
-    for line_number, line in enumerate(lines, start=1):
+   """
+   Tokenizes a list of source code lines into a list of Token objects.
+   Args:
+      lines (list of str): The lines of source code to tokenize.
+      tokens (list): The list to which generated Token objects will be appended.
+   Returns:
+      list: The updated list of Token objects.
+   The function processes each line, removing inline comments, and iteratively matches and extracts tokens in the following order:
+      - Identifiers and keywords
+      - Integers
+      - Strings
+      - Operators
+      - Punctuation
+   Each token is annotated with its type, value, and line number.
+   """
+   for line_number, line in enumerate(lines, start=1):
        # Remove inline comments
        line = line.split('//', 1)[0]
 
@@ -100,8 +115,5 @@ def tokenize(lines, tokens):
              line = line[match.end():]
              continue
 
-          # Unknown token (skip with warning)
-          print(f"Unrecognized token at line {line_number}: '{line[0]}'")
-          line = line[1:]
 
-    return tokens
+   return tokens
