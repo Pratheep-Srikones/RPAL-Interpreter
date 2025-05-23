@@ -1,5 +1,5 @@
 import sys
-from lexicon import Token, tokenize
+from tokenizer import Token, tokenize
 """
 Main entry for the program. Handles command-line args, reads the input file, and tokenizes its contents.
 
@@ -39,9 +39,9 @@ if __name__ == "__main__":
         try:
             lines = file.readlines()
             tokens = tokenize(lines, tokens)
-            print("Tokens: ")
-            for token in tokens:
-                print(f'<{token.type}>: <{token.value}>')
+            # print("Tokens: ")
+            # for token in tokens:
+            #     print(f'<{token.type}>: <{token.value}>')
         except Exception as e:
             print(f"Error reading file: {e}")
             sys.exit(1)
