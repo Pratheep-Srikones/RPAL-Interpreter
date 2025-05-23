@@ -51,13 +51,11 @@ class Token:
        return self.line_number
 
 # Tokenize input lines into a list of tokens
-def tokenize(lines, tokens):
+def tokenize(lines):
    """
    Tokenizes a list of source code lines into a list of Token objects.
    Args:
       lines (list of str): The lines of source code to tokenize.
-      tokens (list): The list to which generated Token objects will be appended.
-   Returns:
       list: The updated list of Token objects.
    The function processes each line, removing inline comments, and iteratively matches and extracts tokens in the following order:
       - Identifiers and keywords
@@ -67,6 +65,7 @@ def tokenize(lines, tokens):
       - Punctuation
    Each token is annotated with its type, value, and line number.
    """
+   tokens = []
    for line_number, line in enumerate(lines, start=1):
        # Remove inline comments
        line = line.split('//', 1)[0]

@@ -4,8 +4,8 @@ from tokenizer import Token, tokenize
 Main entry for the program. Handles command-line args, reads the input file, and tokenizes its contents.
 
 Usage:
-    python main.py <file_path>
-    python main.py --ast <file_path>
+    python myrpal.py <file_path>
+    python myrpal.py --ast <file_path>
 
 Args:
     <file_path>: Path to input file.
@@ -34,11 +34,11 @@ if __name__ == "__main__":
             print("Invalid argument. Use --ast to print AST.")
             sys.exit(1)
 
-    tokens = []
+    
     with open(file_path, 'r') as file:
         try:
             lines = file.readlines()
-            tokens = tokenize(lines, tokens)
+            tokens = tokenize(lines)
             # print("Tokens: ")
             # for token in tokens:
             #     print(f'<{token.type}>: <{token.value}>')
