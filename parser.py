@@ -9,6 +9,10 @@ class Parser:
         self.stack = []
 
     def checkToken(self, expected_type, expected_value):
+        """
+        Checks if the current token matches the expected type and value.
+        Returns True if it matches, False otherwise.
+        """
         # if self.current_token is None:
         #     raise RPALException("Unexpected end of input")
         # if self.current_token.getType() != expected_type:
