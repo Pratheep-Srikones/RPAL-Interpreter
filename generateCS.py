@@ -37,10 +37,7 @@ class CSGenerator:
         self.controlStructures.append(cs)
         print("total control structures:", len(self.controlStructures))
         self.addToControlStructure(cs, node)
-        if node.child and len(node.child) > 0:
-            self.addToControlStructure(cs, node.child[0])  
-            self.addToControlStructure(cs, node.child[1])
-
+        
         return cs
     
     def addToControlStructure(self, cs, node):
@@ -64,7 +61,7 @@ class CSGenerator:
             deltaThen = self.createControlStructure(len(self.controlStructures), node.child[1])
             print("creating delta else")
             deltaElse = self.createControlStructure(len(self.controlStructures), node.child[2])
-            print(f"adding<-> detla(then){deltaThen.number}, delta(else){deltaElse.number}> to control structure {cs.number}")
+            print(f"adding< detla(then){deltaThen.number}, delta(else){deltaElse.number}> to control structure {cs.number}")
             cs.elements.append((deltaThen, deltaElse))
             print(f"adding<beta> to control structure {cs.number}")
             cs.elements.append("beta")
@@ -72,7 +69,7 @@ class CSGenerator:
             print(f"calling addToControlStructure for child 0 of node with head '->' {node.child[0].head}")
 
             self.addToControlStructure(cs, node.child[0])
-
+            print(f"finished addToControlStructure for child 0 of node with head '->' {node.child[0].head}")
             return
         if (type(node.head) is Token):
             label = node.head.getValue()
@@ -82,6 +79,10 @@ class CSGenerator:
             label = node.head
             print(f"adding<{label}> to control structure {cs.number} as node")
             cs.elements.append(label)
+        if node.child and len(node.child) > 0:
+            self.addToControlStructure(cs, node.child[0])  
+            self.addToControlStructure(cs, node.child[1])
+
             
 
     def generate(node):
