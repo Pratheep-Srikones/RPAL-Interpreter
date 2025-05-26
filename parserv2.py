@@ -11,11 +11,15 @@ class Node:
                 if(arr[i]!=None):
                     self.child.append(arr[i])
     
-    def trav(self):
-        print(self.head)
+    def trav(self,n):
+        if(type(self.head)==Token):
+            st = f"<{self.head.getType()}:{self.head.getValue()}>"
+        else:
+            st = self.head
+        print(f"{"." * n} {st}")
         if self.child != []:
             for i in self.child:
-                i.trav()
+                i.trav(n+1)
 
 
 
@@ -66,7 +70,7 @@ class Parser:
             li = []
             li.append(self.Vb())
             n = 1
-            while self.pos < len(self.tokens) and (self.matchtype("IDENTIFIER") or self.match("(")):
+            while self.pos < len(self.tokens) and (self.matchtype("ID") or self.match("(")):
                 li.append(self.Vb())
                 n+=1
             if self.match("."):
@@ -278,13 +282,13 @@ class Parser:
         l1 = self.R()
         while self.match("@"):
             self.movenext()
-            if self.matchtype("IDENTIFIER"):
-                l2 = Node(self.gettoken().value)
+            if self.matchtype("ID"):
+                l2 = Node(self.gettoken())
                 self.movenext()
             else:
-                raise SyntaxError(" identifier missing")
+                raise SyntaxError(" ID missing")
             l3 = self.R()
-            print(" Ap -> Ap @ <Identifier> R")
+            print(" Ap -> Ap @ <ID> R")
             return Node("@",[l1,l2,l3])
             
         
@@ -294,8 +298,8 @@ class Parser:
     def can_start(self):
         if self.pos >= len(self.tokens):
             return False
-        return (self.matchtype("IDENTIFIER") or 
-                self.matchtype("INTEGER") or 
+        return (self.matchtype("ID") or 
+                self.matchtype("INT") or 
                 self.matchtype("STRING") or
                 self.match("true") or 
                 self.match("false") or 
@@ -314,16 +318,16 @@ class Parser:
     
     def Rn(self):
         l2 = None
-        if self.matchtype("IDENTIFIER"):
-            l2 = Node(self.gettoken().value)
+        if self.matchtype("ID"):
+            l2 = Node(self.gettoken())
             self.movenext()
-            print( "Rn -> <IDENTIFIER>")
-        elif self.matchtype("INTEGER"):
-            l2 = Node(self.gettoken().value)
+            print( "Rn -> <ID>")
+        elif self.matchtype("INT"):
+            l2 = Node(self.gettoken())
             self.movenext()
-            print( "Rn -> <INTEGER>")
+            print( "Rn -> <INT>")
         elif self.matchtype("STRING"):
-            l2 = Node(self.gettoken().value)
+            l2 = Node(self.gettoken())
             self.movenext()
             print( "Rn -> <STRING>")
         elif self.match("true"):
@@ -395,11 +399,11 @@ class Parser:
            
     
     def checkvl(self):
-        if self.gettoken().type == "IDENTIFIER" and (self.pos + 1 < len(self.tokens)):
+        if self.gettoken().type == "ID" and (self.pos + 1 < len(self.tokens)):
             return self.tokens[self.pos + 1].value == "," or self.tokens[self.pos + 1].value == "="
         return False
     def list_form_finder(self):
-        if not self.matchtype("IDENTIFIER"):
+        if not self.matchtype("ID"):
             return False
         
         saved_pos = self.pos
@@ -422,20 +426,20 @@ class Parser:
             l2 = self.E()
             print("Db -> Vl = E")
             return Node("=",[l1,l2])
-        elif self.matchtype("IDENTIFIER"):
+        elif self.matchtype("ID"):
             li = []
-            l1 = Node(self.gettoken().value)
+            l1 = Node(self.gettoken())
             li.append(l1)
             self.movenext()
             li.append(self.Vb())
             n = 1
-            while self.pos < len(self.tokens) and (self.matchtype("IDENTIFIER") or self.match("(")):
+            while self.pos < len(self.tokens) and (self.matchtype("ID") or self.match("(")):
                 li.append(self.Vb())
                 n+=1
             if self.match("="):
                 self.movenext()
                 li.append(self.E())
-                print(f"Db -> <IDENTIFIER> {n*"Vb "} = E")
+                print(f"Db -> <ID> {n*"Vb "} = E")
                 return Node("fcn_form",li)
             else:
                 raise TypeError("== missing")
@@ -454,10 +458,10 @@ class Parser:
             raise TypeError("final")
     
     def Vb(self):
-        if self.matchtype("IDENTIFIER"):
-            l1 = Node(self.gettoken().value)
+        if self.matchtype("ID"):
+            l1 = Node(self.gettoken())
             self.movenext()
-            print("Vb -> <IDENTIFIER>")
+            print("Vb -> <ID>")
             return l1
         elif self.match("("):
             self.movenext()
@@ -480,8 +484,8 @@ class Parser:
     def Vl(self):
         n = 0
         li = []
-        if self.matchtype("IDENTIFIER"):
-            li.append(Node(self.gettoken().value))
+        if self.matchtype("ID"):
+            li.append(Node(self.gettoken()))
             self.movenext()
             n+=1
         else:
@@ -489,8 +493,8 @@ class Parser:
         
         while self.match(","):
             self.movenext()
-            if self.matchtype("IDENTIFIER"):
-                li.append(Node(self.gettoken().value))
+            if self.matchtype("ID"):
+                li.append(Node(self.gettoken()))
                 self.movenext()
                 n+=1
             else:
@@ -503,17 +507,17 @@ class Parser:
 
 
             
-with open("test", 'r') as file:
+# with open("test", 'r') as file:
         
-            lines = file.readlines()
-            tokens = tokenize(lines)
-            print("Tokens: ")
-            # for token in tokens:
-            #     print(f'<{token.type}>: <{token.value}>')
-            pp = Parser(tokens)
-            nn = pp.E()
-            print("**********************************************************************************************************")
-            nn.trav()
+#             lines = file.readlines()
+#             tokens = tokenize(lines)
+#             print("Tokens: ")
+#             # for token in tokens:
+#             #     print(f'<{token.type}>: <{token.value}>')
+#             pp = Parser(tokens)
+#             nn = pp.E()
+#             print("**********************************************************************************************************")
+#             nn.trav()
 
 
             
