@@ -2,6 +2,7 @@ import sys
 from tokenizer import Token, tokenize
 from parser import Parser
 from standardizer import StandardizeAST
+from generateCS import CSGenerator
 """
 Main entry for the program. Handles command-line args, reads the input file, and tokenizes its contents.
 
@@ -38,7 +39,7 @@ if __name__ == "__main__":
 
     
     with open(file_path, 'r') as file:
-        try:
+        #try:
             lines = file.readlines()
             tokens = tokenize(lines)
             print("Tokens: ")
@@ -58,9 +59,11 @@ if __name__ == "__main__":
             else:
                 print("AST has been standardized.")
 
+            CSGenerator().createControlStructure(0, ast)
 
-        except Exception as e:
-            print(f"Error: {e}")
-            sys.exit(1)
+
+        # except Exception as e:
+        #     print(f"Error: {e}")
+        #     sys.exit(1)
 
             
