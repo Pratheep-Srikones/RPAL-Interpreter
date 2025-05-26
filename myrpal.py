@@ -46,7 +46,7 @@ if __name__ == "__main__":
             par = Parser(tokens)
             ast = par.E()
             print("*************************************************AST*************************************************")
-            ast.trav()
+            ast.trav(0)
         except Exception as e:
             print(f"Error reading file: {e}")
             sys.exit(1)

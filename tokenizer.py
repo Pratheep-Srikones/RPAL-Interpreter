@@ -10,11 +10,11 @@ RESERVED_KEYWORDS = [
 def isReservedKeyword(token):
     return token in RESERVED_KEYWORDS
 
-# Check if an element is a valid identifier
-def isIdentifier(element):
+# Check if an element is a valid ID
+def isID(element):
     return re.match(r'^[A-Za-z][A-Za-z0-9_]*', element)
 
-# Check if an element is an integer
+# Check if an element is an INT
 def isDigit(element):
     return re.match(r'^[0-9]+', element)
 
@@ -80,8 +80,8 @@ def tokenize(lines):
     The function processes each line, removing inline comments, and iteratively 
     matches and extracts tokens in the following order:
         - Double operators (==, !=, etc.)
-        - Identifiers and keywords
-        - Integers
+        - IDs and keywords
+        - INTs
         - Strings
         - Single operators
         - Punctuation
@@ -106,21 +106,21 @@ def tokenize(lines):
                 line = line[match.end():]
                 continue
 
-            # Identifier or keyword
-            match = isIdentifier(line)
+            # ID or keyword
+            match = isID(line)
             if match:
                 token = match.group()
                 if isReservedKeyword(token):
                     tokens.append(Token("KEYWORD", token, line_number))
                 else:
-                    tokens.append(Token("IDENTIFIER", token, line_number))
+                    tokens.append(Token("ID", token, line_number))
                 line = line[match.end():]
                 continue
 
-            # Integer
+            # INT
             match = isDigit(line)
             if match:
-                tokens.append(Token("INTEGER", match.group(), line_number))
+                tokens.append(Token("INT", match.group(), line_number))
                 line = line[match.end():]
                 continue
 
