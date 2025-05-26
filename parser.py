@@ -79,7 +79,7 @@ class Parser:
                 print(self.gettoken().value)
                 raise SyntaxError("syntax error")
             l2 = self.E()
-            print("E -> let D in E ")
+            #print("E -> let D in E ")
             return Node("let",[l1,l2])
             
         elif self.match("fn"):

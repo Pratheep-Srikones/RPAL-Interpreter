@@ -1,4 +1,1 @@
-//let rec Factorial n = n ls 0 -> 'input less than 0' | n eq 0 -> 1| n * Factorial (n-1)
-//in Print (Factorial 5)
-
-let x = 0 in x+9
+let f x y z = x + y + z in f 1 2 3

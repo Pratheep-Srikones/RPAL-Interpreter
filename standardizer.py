@@ -125,7 +125,7 @@ class StandardizeAST:
 
         vNodes = node.child[1:numberOfVariables+1]
 
-        node.changeHead("lambda")
+        node.changeHead("=")
         node.clearAllChildren()
 
         node.addChild(pNode)
