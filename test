@@ -1,4 +1,4 @@
-let Sum(A) = Psum (A,Order A )
-where rec Psum (T,N) = N eq 0 -> 0
-| Psum(T,N-1)+T N
-in Print ( Sum (1,2,3,4,5) )
+//let rec Factorial n = n ls 0 -> 'input less than 0' | n eq 0 -> 1| n * Factorial (n-1)
+//in Print (Factorial 5)
+
+let x = 0 in x+9

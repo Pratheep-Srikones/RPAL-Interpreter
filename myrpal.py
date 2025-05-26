@@ -1,6 +1,7 @@
 import sys
 from tokenizer import Token, tokenize
-from parserv2 import Parser
+from parser import Parser
+from standardizer import StandardizeAST
 """
 Main entry for the program. Handles command-line args, reads the input file, and tokenizes its contents.
 
@@ -46,9 +47,20 @@ if __name__ == "__main__":
             par = Parser(tokens)
             ast = par.E()
             print("*************************************************AST*************************************************")
-            ast.trav(0)
+            
+            if printAST:
+                ast.trav(0)
+            
+            print("*************************************************AST*************************************************")
+            StandardizeAST().standardize(ast)
+            if printAST:
+                ast.trav(0)
+            else:
+                print("AST has been standardized.")
+
+
         except Exception as e:
-            print(f"Error reading file: {e}")
+            print(f"Error: {e}")
             sys.exit(1)
 
             
