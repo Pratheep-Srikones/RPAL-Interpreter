@@ -2,9 +2,18 @@ from RPALException import RPALException
 from tokenizer import Token
 
 class Lambda:
-    def __init__(self,k, variable):
+    def __init__(self,k, variables):
         self.k = k
-        self.variable = variable
+        if isinstance(variables, list):
+            self.variables = variables
+        else:
+            self.variables = [variables]
+class Tau:
+    def __init__(self, elementNumber):
+        self.elementNumber = elementNumber
+    
+    def getNumberOfElements(self):
+        return self.elementNumber
 
 class ControlStructure:
     def __init__(self, number):
@@ -42,15 +51,26 @@ class CSGenerator:
     
     def addToControlStructure(self, cs, node):
         if node.head == "lambda":
+            if node.child[0].head == ",":
+                k = len(self.controlStructures)
+                variables = node.child[0].child
+                if len(variables) < 1:
+                    raise RPALException("Lambda node with ',' must have at least one variable")
+                self.createControlStructure(k, node.child[1])
+                variablesToPrint = [var.head.getValue() if isinstance(var.head, Token) else var.head for var in variables]
+                print(f"adding<lambda {k}, {variablesToPrint}> to control structure {cs.number}")
+                cs.elements.append(Lambda(k, [var.head for var in variables]))
+                return
+            
+
             if len(node.child) != 2:
                 raise RPALException("Lambda node must have exactly two children")
-            if (type(node.child[0].head) is Token):
-                variable = node.child[0].head.getValue()
-            elif (type(node.child[0].head) is str):
-                variable = node.child[0].head
+           
+            variable = node.child[0].head
             k = len(self.controlStructures)
-            newCS = self.createControlStructure(k, node.child[1])
-            print(f"adding<lambda {k}, {variable}> to control structure {cs.number}")
+            self.createControlStructure(k, node.child[1])
+            printVariable = variable.getValue() if isinstance(variable, Token) else variable
+            print(f"adding<lambda {k}, {printVariable}> to control structure {cs.number}")
             cs.elements.append(Lambda(k, variable))
             return
         
@@ -71,14 +91,24 @@ class CSGenerator:
             self.addToControlStructure(cs, node.child[0])
             print(f"finished addToControlStructure for child 0 of node with head '->' {node.child[0].head}")
             return
-        if (type(node.head) is Token):
-            label = node.head.getValue()
-            print(f"adding<{label}> to control structure {cs.number} as node token")
-            cs.elements.append(label)
-        elif (type(node.head) is str):
-            label = node.head
-            print(f"adding<{label}> to control structure {cs.number} as node")
-            cs.elements.append(label)
+        
+        if node.head == "tau":
+            if len(node.child) < 2:
+                raise RPALException("Node with head 'tau' must have at least two children")
+            
+            print(f"adding<tau({len(node.child)})> to control structure {cs.number}")
+            cs.elements.append(Tau(len(node.child)))
+
+            for child in node.child:
+                print(f"calling addToControlStructure for child {child.head} of node with head 'tau'")
+                cs.elements.append(child.head)
+            return
+        
+        
+        label = node.head
+        printLabel = label.getValue() if isinstance(label, Token) else label
+        print(f"adding<{printLabel}> to control structure {cs.number}")
+        cs.elements.append(label)
         if node.child and len(node.child) > 0:
             self.addToControlStructure(cs, node.child[0])  
             self.addToControlStructure(cs, node.child[1])

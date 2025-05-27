@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     
     with open(file_path, 'r') as file:
-        #try:
+        try:
             lines = file.readlines()
             tokens = tokenize(lines)
             print("Tokens: ")
@@ -62,8 +62,8 @@ if __name__ == "__main__":
             CSGenerator().createControlStructure(0, ast)
 
 
-        # except Exception as e:
-        #     print(f"Error: {e}")
-        #     sys.exit(1)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
             
