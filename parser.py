@@ -259,12 +259,12 @@ class Parser:
                     self.movenext()
                     l3 = self.At()
                     #print("A -> A + At")
-                    return Node("+",[l2,l3])
+                    l2 = Node("+",[l2,l3])
                 elif self.match("-"):
                     self.movenext()
                     l3 = self.At()
                     #print("A -> A - At")
-                    return Node("-",[l2,l3])
+                    l2 =  Node("-",[l2,l3])
                 else:
                     break
             #print("A -> At")
@@ -334,7 +334,7 @@ class Parser:
         while self.pos < len(self.tokens) and self.can_start():
             l2 = self.Rn()
             #print("R -> R Rn")
-            return Node ("gamma",[l1,l2])
+            l1= Node ("gamma",[l1,l2])
         #print("R -> Rn")
         return l1
     
@@ -531,17 +531,17 @@ class Parser:
 
 
             
-# with open("test", 'r') as file:
+
         
-#             lines = file.readlines()
-#             tokens = tokenize(lines)
-#             print("Tokens: ")
+# lines = ["let f x y z = x + y + z in f 1 2 3"]
+# tokens = tokenize(lines)
+# print("Tokens: ")
 #             # for token in tokens:
 #             #     print(f'<{token.type}>: <{token.value}>')
-#             pp = Parser(tokens)
-#             nn = pp.E()
-#             print("**********************************************************************************************************")
-#             nn.trav()
+# pp = Parser(tokens)
+# nn = pp.E()
+# print("**********************************************************************************************************")
+# nn.trav(0)
 
 
             
