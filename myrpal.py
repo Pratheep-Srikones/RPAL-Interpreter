@@ -59,7 +59,7 @@ if __name__ == "__main__":
             else:
                 print("AST has been standardized.")
 
-            CSGenerator().createControlStructure(0, ast)
+            controlStructures = CSGenerator().generate(ast)
 
 
         except Exception as e:

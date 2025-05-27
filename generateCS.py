@@ -46,8 +46,8 @@ class CSGenerator:
         self.controlStructures.append(cs)
         print("total control structures:", len(self.controlStructures))
         self.addToControlStructure(cs, node)
+
         
-        return cs
     
     def addToControlStructure(self, cs, node):
         if node.head == "lambda":
@@ -115,9 +115,13 @@ class CSGenerator:
 
             
 
-    def generate(node):
+    def generate(self,node):
         if node is None:
             raise RPALException("Node cannot be None")
+        
+        self.createControlStructure(0, node)
+
+        return self.getControlStructures()
         
 
         
