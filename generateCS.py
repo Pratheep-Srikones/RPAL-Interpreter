@@ -12,6 +12,21 @@ class Lambda:
             self.variables = variables
         else:
             self.variables = [variables]
+        self.c = None  # Placeholder for the evironment associated with this lambda
+
+    def setC(self, c):
+        """
+        Sets the environment number associated with this lambda.
+        Args:
+            c: The environment to associate with this lambda.
+        """
+        self.c = c
+    def getC(self):
+        """
+        Returns the environment number associated with this lambda.
+        """
+        return self.c
+    
 
 class Tau:
     """
@@ -26,6 +41,8 @@ class Tau:
         Returns the number of elements in the tuple.
         """
         return self.elementNumber
+    
+
 
 class ControlStructure:
     """
@@ -114,7 +131,8 @@ class CSGenerator:
             # Create control structure for 'else' branch
             deltaElse = self.createControlStructure(len(self.controlStructures), node.child[2])
             print(f"adding< detla(then){deltaThen.number}, delta(else){deltaElse.number}> to control structure {cs.number}")
-            cs.elements.append((deltaThen, deltaElse))
+            cs.elements.append(deltaThen)
+            cs.elements.append(deltaElse)
             print(f"adding<beta> to control structure {cs.number}")
             cs.elements.append("beta")
 
@@ -141,7 +159,7 @@ class CSGenerator:
         printLabel = label.getValue() if isinstance(label, Token) else label
         print(f"adding<{printLabel}> to control structure {cs.number}")
         cs.elements.append(label)
-        # Recursively add children in inorder traversal if they exist
+        # Recursively add children in preorder traversal if they exist
         if node.child and len(node.child) > 0:
             self.addToControlStructure(cs, node.child[0])  
             self.addToControlStructure(cs, node.child[1])
