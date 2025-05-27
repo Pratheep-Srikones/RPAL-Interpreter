@@ -273,12 +273,15 @@ class StandardizeAST:
 
         node.clearAllChildren()
         currLambdaNode = node
-        for vNode in vNodes:
-            currLambdaNode.addChild(vNode)
-            lambdaNode = Node("lambda")
-            currLambdaNode.addChild(lambdaNode)
-            currLambdaNode = lambdaNode
-        currLambdaNode.addChild(eNode)
+        for i, vNode in enumerate(vNodes):
+            if i == len(vNodes) - 1:
+                currLambdaNode.addChild(vNode)
+                currLambdaNode.addChild(eNode)
+            else:
+                currLambdaNode.addChild(vNode)
+                lambdaNode = Node("lambda")
+                currLambdaNode.addChild(lambdaNode)
+                currLambdaNode = lambdaNode
 
     def standardize(self, node=None):
         """

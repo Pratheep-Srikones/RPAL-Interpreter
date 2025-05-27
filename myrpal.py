@@ -41,20 +41,20 @@ if __name__ == "__main__":
 
     
     with open(file_path, 'r') as file:
-        #try:
+        try:
             lines = file.readlines()
             tokens = tokenize(lines)
-            print("Tokens: ")
-            for token in tokens:
-                print(f'<{token.type}>: <{token.value}>')
+            # print("Tokens: ")
+            # for token in tokens:
+            #     print(f'<{token.type}>: <{token.value}>')
             par = Parser(tokens)
             ast = par.E()
-            print("*************************************************AST*************************************************")
+            
             
             if printAST:
                 ast.trav(0)
+                print()
             
-            print("*************************************************AST*************************************************")
             StandardizeAST().standardize(ast)
             if printAST:
                 ast.trav(0)
@@ -63,17 +63,18 @@ if __name__ == "__main__":
 
             controlStructures = CSGenerator().generate(ast)
 
-            primitiveEnvironment = Environment(0)
+            primitiveEnvironment = Environment(0,variables={"Print": "print","nil" : "nil","Y":"Y"})
             machine = CSEMachine(controlStructures, primitiveEnvironment)
-            output = machine.interpret()
-            print("*************************************************Output*************************************************")
-            print(output)
+            machine.interpret()
+
+          
+            
 
 
 
 
-        # except Exception as e:
-        #     print(f"Error: {e}")
-        #     sys.exit(1)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
             

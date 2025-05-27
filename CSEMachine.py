@@ -1,11 +1,13 @@
 from Environment import Environment
 from RPALException import RPALException
-from generateCS import ControlStructure, Lambda, Tau
+from generateCS import ControlStructure, Eta, Lambda, Tau
 from tokenizer import Token
 
 # List of supported binary and unary operators
-BINARY_OPERATORS = ["+", "-", "*", "/", "eq", "gr", "ge", "ls", "le"]
+BINARY_OPERATORS = ["+", "-", "*", "/", "eq", "gr", "ge", "ls", "le","aug"]
 UNARY_OPERATORS = ["not", "neg"]
+BUILTIN_FUNCTIONS = ['print']
+OTHER_KEYWORDS = ['nil', 'Y',"Print"]
 
 class CSEMachine:
     """
@@ -25,10 +27,8 @@ class CSEMachine:
         self.currentEnvironment = environment
         self.totalEnvironments = 1
 
-        # Start with the initial environment on the control stack
         self.controlStack.append(self.currentEnvironment)
         defaultControl = self.findControlStructure(0)
-        #print(f"[INIT] Initializing CSEMachine with control structure 0: {defaultControl}")
         if defaultControl is None:
             raise RPALException("Control structure with number 0 not found.")
         if type(defaultControl) is not ControlStructure:
@@ -40,7 +40,6 @@ class CSEMachine:
         self.insertControlStructure(defaultControl)
 
         self.stack.append(self.currentEnvironment)
-        #print(f"[INIT] controlStack: {self.controlStack}, stack: {self.stack}")
 
     def findControlStructure(self, number):
         """
@@ -49,7 +48,6 @@ class CSEMachine:
         """
         for control in self.controls:
             if control.number == number:
-                #print(f"[findCOntrolStructure] Found control structure {number}")
                 return control
         raise RPALException(f"Control structure with number {number} not found.")
     
@@ -69,11 +67,8 @@ class CSEMachine:
         and pushes the value onto the stack.
         """
         name = self.controlStack.pop()
-        #print(f"[rule1] Popped name: {name}")
         value = self.currentEnvironment.lookUpValue(name)
-        #print(f"[rule1] Looked up value: {value}")
         self.stack.append(value)
-        print(f"[rule1] Stack after append: {self.stack}")
         return
 
     def rule2(self):
@@ -83,13 +78,10 @@ class CSEMachine:
         and pushes it onto the stack.
         """
         lambdaControl = self.controlStack.pop()
-        print(f"[rule2] Popped lambdaControl: {lambdaControl}")
         if (type(lambdaControl) is not Lambda):
             raise RPALException("Expected a Lambda control structure.")
         lambdaControl.setC(self.currentEnvironment.number)
         self.stack.append(lambdaControl)
-        print(f"[rule2] Stack after append: {self.stack}")
-        print(f"Lambda Control after setting environment: <{lambdaControl.c} lambda {lambdaControl.variables} {lambdaControl.k}>")
         return
     
     def rule3(self):
@@ -103,40 +95,33 @@ class CSEMachine:
         creates a new environment, and updates the control and main stacks accordingly.
         """
         self.controlStack.pop()
-        print(f"[rule4] Popped 'gamma' from controlStack")
         lambdaControl = self.stack.pop()
-        print(f"[rule4] Popped lambdaControl from stack: {lambdaControl}")
         if (type(lambdaControl) is not Lambda):
             raise RPALException("Expected a Lambda control structure.")
         
         variable = lambdaControl.variables[0] if len(lambdaControl.variables) == 1 else lambdaControl.variables
-        print(f"[rule4] Variable to bind: {variable}")
         if type(variable) is Token:
             variable = variable.getValue()
         
         value = self.stack.pop()
-        print(f"[rule4] Popped value from stack: {value}")
         
         if type(value) is Token:
             value = value.getValue()
-
+        #find the control structure for the lambda
         newControl = self.findControlStructure(lambdaControl.k)
 
         if type(newControl) is not ControlStructure:
             raise RPALException(f"Control structure with number {lambdaControl.k} is not a valid ControlStructure.")
         
+        # Create a new environment for the lambda binding with new variable
         newEnv = Environment(self.totalEnvironments, self.currentEnvironment, {variable: value})
-        print(f"[rule4] Created new environment: {newEnv}")
         self.currentEnvironment = newEnv
         self.totalEnvironments += 1
 
         self.controlStack.append(newEnv)
-        print(f"[rule4] Appended newEnv to controlStack: {self.controlStack}")
         self.insertControlStructure(newControl)
 
-        print(f"[rule4] controlStack after adding newControl elements: {self.controlStack}")
         self.stack.append(newEnv)
-        print(f"[rule4] Stack after append: {self.stack}")
         return
     
     def rule5(self):
@@ -144,10 +129,20 @@ class CSEMachine:
         CSE Rule 5: Handles environment removal.
         Pops the environment from the control stack and removes the corresponding environment from the stack.
         """
-        popped_env = self.controlStack.pop()
-        #print(f"[rule5] Popped environment from controlStack: {popped_env}")
-        popped_stack_env = self.stack.pop(-2)
-        #print(f"[rule5] Popped environment from stack: {popped_stack_env}")
+        self.controlStack.pop()
+        self.stack.pop(-2)
+        
+        # Traverse the control stack to find the first Environment object
+        nextEnv = None
+        #print("searching for next environment in control stack")
+        #print(self.controlStack)
+        for i in range(len(self.controlStack)-1, -1, -1):
+            #print(f"Checking control stack item at index {i}: {self.controlStack[i]}")
+            if type(self.controlStack[i]) is Environment:
+                nextEnv = self.controlStack[i]
+                break
+        self.currentEnvironment = nextEnv
+        self.totalEnvironments -= 1
 
     def rule6(self):
         """
@@ -156,11 +151,9 @@ class CSEMachine:
         applies the operation, and pushes the result onto the stack.
         """
         operator = self.controlStack.pop()
-        #print(f"[rule6] Popped operator: {operator}")
 
         operand1 = self.stack.pop()
         operand2 = self.stack.pop()
-        #print(f"[rule6] Popped operands: {operand1}, {operand2}")
         if type(operand1) is Token:
             operand1 = operand1.getValue()
         if type(operand2) is Token:
@@ -186,10 +179,14 @@ class CSEMachine:
             result = (operand1 < operand2)
         elif operator == "le":
             result = (operand1 <= operand2)
+        elif operator == "aug":
+            if operand1 == "nil":
+                result = [operand2]
+            elif type(operand1) is list:
+                result = operand1 + [operand2]
+                
 
-        #print(f"[rule6] Computed result: {result}")
         self.stack.append(result)
-        #print(f"[rule6] Stack after append: {self.stack}")
         return
 
     def rule7(self):
@@ -199,9 +196,7 @@ class CSEMachine:
         applies the operation, and pushes the result onto the stack.
         """
         operator = self.controlStack.pop()
-        #print(f"[rule7] Popped operator: {operator}")
         operand = self.stack.pop()
-        #print(f"[rule7] Popped operand: {operand}")
 
         if type(operand) is Token:
             operand = operand.getValue()
@@ -209,35 +204,38 @@ class CSEMachine:
         if operator == "not":
             result = not operand
         elif operator == "neg":
-            result = -operand	
+            result = -operand
+        elif operator == "print":
+            print(operand)	
         
-        #print(f"[rule7] Computed result: {result}")
         self.stack.append(result)
-        #print(f"[rule7] Stack after append: {self.stack}")
         return
     
     def rule8(self):
+        """
+        CSE Rule 8: Handles conditional branching (beta).
+        Pops 'beta' from the control stack and evaluates the condition from the stack.
+        Depending on the condition, inserts the appropriate control structure (delta_then/delta_else branch).
+        """
         beta = self.controlStack.pop()
         if beta != "beta":
             raise RPALException("Expected 'beta' in control stack.")
-        #print(f"[rule8] Popped 'beta' from controlStack")
         evaluated = self.stack.pop()
-        #print(f"[rule8] Popped evaluated expression from stack: {evaluated}")
-        if (evaluated):
-            #print(f"before popping deltaelse: {self.controlStack}")
-            self.controlStack.pop()  # Remove the 'else' branch
-            #print(f"[rule8] Popped 'else' branch from controlStack")
-            #print(self.controlStack)
-            deltaThen = self.controlStack.pop()
-            #print(type(deltaThen))
+        if evaluated:
+            self.controlStack.pop()  # Remove the 'else' branch (not taken)
+            deltaThen = self.controlStack.pop()  # Get the 'then' branch control structure
             self.insertControlStructure(deltaThen)
         else:
-            deltaElse = self.controlStack.pop()
-            #print(f"[rule8] Popped deltaElse from controlStack: {deltaElse}")
-            self.controlStack.pop()  # Remove the 'then' branch
+            deltaElse = self.controlStack.pop()  # Get the 'else' branch control structure
+            self.controlStack.pop()  # Remove the 'then' branch (not taken)
             self.insertControlStructure(deltaElse)
 
     def rule9(self):
+        """
+        CSE Rule 9: Handles tuple construction (tau).
+        Pops a Tau control structure from the control stack and collects the specified number of elements from the stack,
+        then pushes the constructed tuple (as a list) onto the stack.
+        """
         tau = self.controlStack.pop()
         if type(tau) is not Tau:
             raise RPALException("Expected 'tau' in control stack.")
@@ -246,15 +244,18 @@ class CSEMachine:
         listOfElements = []
         for i in range(numberOfElements):
             element = self.stack.pop()
-            print(f"[rule9] Popped element {i}: {element}")
             if type(element) is Token:
                 element = element.getValue()
             listOfElements.append(element)
-        print(f"[rule9] Collected elements: {listOfElements}")
 
         self.stack.append(listOfElements)
 
     def rule10(self):
+        """
+        CSE Rule 10: Handles tuple element selection.
+        Pops 'gamma' from the control stack, a tuple (list) from the stack, and an index from the stack.
+        Pushes the selected tuple element onto the stack (1-based indexing).
+        """
         gamma = self.controlStack.pop()
         tupleElements = self.stack.pop()
 
@@ -262,19 +263,108 @@ class CSEMachine:
             raise RPALException("Expected 'gamma' in control stack.")
         if type(tupleElements) is not list:
             raise RPALException("Expected a list of elements on the stack for 'gamma' operation.")
-        print(f"[rule10] Popped 'gamma' from controlStack")
         index = self.stack.pop()
-        print(f"[rule10] Popped index from stack: {index}")
         if not isinstance(index, int):
             raise RPALException("Index must be an integer.")
         if index < 0 or index >= len(tupleElements):
             raise RPALException("Index out of bounds for tuple elements.")
-        result = tupleElements[index-1]  # Adjust for 1-based indexing in RPAL
-        print(f"[rule10] Result of tuple access: {result}")
+        #index adjusting RPAL uses 1-based indexing
+        result = tupleElements[index-1]
         self.stack.append(result)
 
     def rule11(self):
-        pass
+        """
+        CSE Rule 11: Handles function application (gamma) to a lambda with multiple arguments.
+        Pops 'gamma' from the control stack, a Lambda from the stack, and a list of argument values from the stack.
+        Binds arguments to lambda variables, creates a new environment, and inserts the lambda's control structure.
+        """
+        gamma = self.controlStack.pop()
+        lambdaControl = self.stack.pop()
+        if type(gamma) is not str or gamma != "gamma":
+            raise RPALException("Expected 'gamma' in control stack.")
+        if type(lambdaControl) is not Lambda:
+            raise RPALException("Expected a Lambda control structure on the stack for 'gamma' operation.")
+        values = self.stack.pop()
+        if type(values) is not list:
+            raise RPALException("Expected a list of names on the stack for 'gamma' operation.")
+        if len(values) != len(lambdaControl.variables):
+            raise RPALException("Number of names does not match number of variables in lambda.")
+
+        dataDict = {}
+        for var, name in zip(lambdaControl.variables, values):
+            if type(var) is Token:
+                var = var.getValue()
+            if type(name) is Token:
+                name = name.getValue()
+            dataDict[var] = name
+
+        # Create a new environment for the lambda application
+        newEnv = Environment(self.totalEnvironments, self.currentEnvironment, dataDict)
+        self.currentEnvironment = newEnv
+        self.totalEnvironments += 1
+        self.controlStack.append(newEnv)
+        self.stack.append(newEnv)
+        newControl = self.findControlStructure(lambdaControl.k)
+        if type(newControl) is not ControlStructure:
+            raise RPALException(f"Control structure with number {lambdaControl.k} is not a valid ControlStructure.")
+        self.insertControlStructure(newControl)
+
+        return
+
+    def rule12(self):
+        """
+        CSE Rule 12: Handles Y combinator application for recursion.
+        Pops 'gamma' from the control stack, 'Y' from the stack, and a Lambda from the stack.
+        Wraps the lambda in an Eta structure and pushes it onto the stack.
+        """
+        gamma = self.controlStack.pop()
+        if gamma != "gamma":
+            raise RPALException("Expected 'gamma' in control stack.")
+        yStar = self.stack.pop()
+        if yStar != "Y":
+            raise RPALException("Expected 'Y' for yStar in control stack.")
+        lambdaControl = self.stack.pop()
+        if type(lambdaControl) is not Lambda:
+            raise RPALException("Expected a Lambda control structure on the stack for 'gamma' operation.")
+        eta  = Eta(lambdaControl)
+        self.stack.append(eta)
+
+    def rule13(self):
+        """
+        CSE Rule 13: Handles Eta structure application (for recursion).
+        Converts the Eta on the stack to a Lambda, pushes it back, and adds 'gamma' to the control stack
+        to trigger further application.
+        """
+        eta = self.stack[-1]
+        if type(eta) is not Eta:
+            raise RPALException("Expected an Eta instance on the stack.")
+
+        newLambda = eta.toLambda()
+
+        self.stack.append(newLambda)
+        self.controlStack.append("gamma")
+
+        return
+    
+    def builtinFunction(self):
+        """
+        Handles built-in functions.
+        Pops a built-in function name from the control stack and applies it to the top of the stack.
+        """
+        self.controlStack.pop()  # Pop 'gamma'
+        functionName = self.stack.pop()
+        if functionName not in BUILTIN_FUNCTIONS:
+            raise RPALException(f"Unknown built-in function: {functionName}")
+        
+        value = self.stack[-1]
+        if type(value) is Token:
+            value = value.getValue()
+
+        if functionName == "print":
+            print(value)
+            return
+
+        
 
     def interpret(self):
         """
@@ -282,42 +372,50 @@ class CSEMachine:
         Processes the control stack and applies the appropriate rules until the control stack is empty.
         Returns the final result of the computation.
         """
-        print("[interpret] Starting interpretation")
         while len(self.controlStack) > 0:
-            print(f"[interpret] controlStack: {self.controlStack}")
-            print(f"[interpret] stack: {self.stack}")
-            if type(self.controlStack[-1]) is Token:
-                print("[interpret] Applying rule1")
+            #NOTE : The rule numbers are similar to the ones in the lecture note.
+            if type(self.controlStack[-1]) is Token or self.controlStack[-1] in OTHER_KEYWORDS:
+                print("Rule 1")
                 self.rule1()
             elif type(self.controlStack[-1]) is Lambda:
-                print("[interpret] Applying rule2")
+                print("Rule 2")
                 self.rule2()
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) == 1:
-                print("[interpret] Applying rule4")
+                print("Rule 3")
                 self.rule4()
             elif type(self.controlStack[-1]) is Environment:
-                print("[interpret] Applying rule5")
+                print("Rule 5")
                 self.rule5()
             elif self.controlStack[-1] in BINARY_OPERATORS:
-                print("[interpret] Applying rule6")
+                print("Rule 6")
                 self.rule6()
             elif self.controlStack[-1] in UNARY_OPERATORS:
-                print("[interpret] Applying rule7")
+                print("Rule 7")
                 self.rule7()
             elif self.controlStack[-1] == "beta":
-                print("[interpret] Applying rule8")
+                print("Rule 8")
                 self.rule8()
             elif type(self.controlStack[-1]) is Tau:
-                print("[interpret] Applying rule9")
+                print("Rule 9")
                 self.rule9()
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is list and len(self.stack[-1]) > 0:
-                print("[interpret] Applying rule10")
+                print("Rule 10")
                 self.rule10()
+            elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) > 1:
+                print("Rule 11")
+                self.rule11()
+            elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is str and self.stack[-1] == "Y":
+                print("Rule 12")
+                self.rule12()
+            elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Eta:
+                print("Rule 13")
+                self.rule13()
+            elif self.controlStack[-1] == "gamma" and self.stack[-1] in BUILTIN_FUNCTIONS:
+                self.builtinFunction()
             else:
                 raise RPALException(f"Unknown control structure: {self.controlStack[-1]}")
         
         result = self.stack.pop()
-        print(f"[interpret] Final result: {result}")
         return result
 
     

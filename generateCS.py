@@ -27,6 +27,8 @@ class Lambda:
         """
         return self.c
     
+    
+    
 
 class Tau:
     """
@@ -42,7 +44,33 @@ class Tau:
         """
         return self.elementNumber
     
+    
 
+class Eta:
+    def __init__(self, lambdaNode):
+        """
+        Represents an eta reduction in the control structure.
+        Stores the lambda abstraction associated with this eta.
+        Args:
+            lambda (Lambda): The lambda abstraction to associate with this eta.
+        """
+        if not isinstance(lambdaNode, Lambda):
+            raise RPALException("Eta reduction must be associated with a Lambda instance")
+        self.k = lambdaNode.k
+        self.variables = lambdaNode.variables
+        self.c = lambdaNode.c
+
+        return
+    
+    def toLambda(self):
+        """
+        Generates a Lambda instance from this eta reduction.
+        Returns:
+            Lambda: The Lambda instance associated with this eta.
+        """
+        lambdaNode = Lambda(self.k, self.variables)
+        lambdaNode.setC(self.c)
+        return lambdaNode
 
 class ControlStructure:
     """
@@ -151,7 +179,8 @@ class CSGenerator:
             # Add each child of the tuple to the control structure
             for child in node.child:
                 print(f"calling addToControlStructure for child {child.head} of node with head 'tau'")
-                cs.elements.append(child.head)
+                self.addToControlStructure(cs, child)
+
             return
         
         # Handle all other nodes (e.g., operators, constants, identifiers)
