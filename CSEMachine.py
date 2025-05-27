@@ -1,6 +1,6 @@
 from Environment import Environment
 from RPALException import RPALException
-from generateCS import ControlStructure, Lambda
+from generateCS import ControlStructure, Lambda, Tau
 from tokenizer import Token
 
 # List of supported binary and unary operators
@@ -235,6 +235,26 @@ class CSEMachine:
             self.controlStack.pop()  # Remove the 'then' branch
             self.insertControlStructure(deltaElse)
 
+    def rule9(self):
+        tau = self.controlStack.pop()
+        if type(tau) is not Tau:
+            raise RPALException("Expected 'tau' in control stack.")
+
+        numberOfElements = tau.elementNumber
+        listOfElements = []
+        for i in range(numberOfElements):
+            element = self.controlStack.pop()
+            print(f"[rule9] Popped element {i}: {element}")
+            if type(element) is Token:
+                element = element.getValue()
+            listOfElements.append(element)
+        print(f"[rule9] Collected elements: {listOfElements}")
+
+        self.stack.append(listOfElements)
+
+    def rule10(self):
+        gamma = self.controlStack.pop()
+
 
     def interpret(self):
         """
@@ -252,7 +272,7 @@ class CSEMachine:
             elif type(self.controlStack[-1]) is Lambda:
                 print("[interpret] Applying rule2")
                 self.rule2()
-            elif self.controlStack[-1] == "gamma" and type(self.stack[0] is Lambda):
+            elif self.controlStack[-1] == "gamma" and type(self.stack[0] is Lambda) and len(self.stack[0].variables) == 1:
                 print("[interpret] Applying rule4")
                 self.rule4()
             elif type(self.controlStack[-1]) is Environment:
