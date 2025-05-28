@@ -25,6 +25,7 @@ class CSEMachine:
         self.controlStack = []
         self.stack = []
         self.currentEnvironment = environment
+        self.environments = [ environment ]  # List to keep track of all environments
         self.totalEnvironments = 1
 
         self.controlStack.append(self.currentEnvironment)
@@ -93,7 +94,15 @@ class CSEMachine:
                 print(printable, end=",")
         print()
 
-
+    def findEnvironment(self, number):
+        """
+        Finds and returns the environment with the specified number.
+        Raises an exception if not found.
+        """
+        for env in self.environments:
+            if env.number == number:
+                return env
+        raise RPALException(f"Environment with number {number} not found.")
     def findControlStructure(self, number):
         """
         Finds and returns the control structure with the specified number.
@@ -133,6 +142,7 @@ class CSEMachine:
         lambdaControl = self.controlStack.pop()
         if (type(lambdaControl) is not Lambda):
             raise RPALException("Expected a Lambda control structure.")
+        
         lambdaControl.setC(self.currentEnvironment.number)
         self.stack.append(lambdaControl)
         return
@@ -166,11 +176,18 @@ class CSEMachine:
 
         if type(newControl) is not ControlStructure:
             raise RPALException(f"Control structure with number {lambdaControl.k} is not a valid ControlStructure.")
+        #print('searching for parent environment with number', lambdaControl.c)
         
+        parentEnv = self.findEnvironment(lambdaControl.c)
+        if type(parentEnv) is not Environment:
+            raise RPALException(f"Parent environment with number {lambdaControl.c} is not a valid Environment.")
         # Create a new environment for the lambda binding with new variable
-        newEnv = Environment(self.totalEnvironments, self.currentEnvironment, {variable: value})
+        newEnv = Environment(self.totalEnvironments, parentEnv, {variable: value})
+        #print(f"Creating new environment {newEnv.number} with parent {parentEnv.number} and variable binding {variable}: {value}")
         self.currentEnvironment = newEnv
+        self.environments.append(newEnv)
         self.totalEnvironments += 1
+        #print(f"Total environments: {self.totalEnvironments}")
 
         self.controlStack.append(newEnv)
         self.insertControlStructure(newControl)
@@ -200,7 +217,7 @@ class CSEMachine:
                 nextEnv = self.controlStack[i]
                 break
         self.currentEnvironment = nextEnv
-        self.totalEnvironments -= 1
+        #print(f"Current environment set to {self.currentEnvironment.number} after rule 5 execution.")
 
     def rule6(self):
         """
@@ -297,11 +314,18 @@ class CSEMachine:
         tau = self.controlStack.pop()
         if type(tau) is not Tau:
             raise RPALException("Expected 'tau' in control stack.")
+        
+        if self.stack[-1] == "nil":
+            return
+
 
         numberOfElements = tau.elementNumber
+        
         listOfElements = []
         for i in range(numberOfElements):
             element = self.stack.pop()
+            if type(element) is Environment:
+                raise RPALException("Cannot construct a tuple with an Environment object.")
             if type(element) is Token:
                 element = element.getValue()
             listOfElements.append(element)
@@ -355,10 +379,14 @@ class CSEMachine:
             if type(name) is Token:
                 name = name.getValue()
             dataDict[var] = name
-
+        parentEnv = self.findEnvironment(lambdaControl.c)
+        if type(parentEnv) is not Environment:
+            raise RPALException(f"Parent environment with number {lambdaControl.c} is not a valid Environment.")
         # Create a new environment for the lambda application
-        newEnv = Environment(self.totalEnvironments, self.currentEnvironment, dataDict)
+        newEnv = Environment(self.totalEnvironments, parentEnv, dataDict)
+        #print(f"Creating new environment {newEnv.number} with parent {parentEnv.number} and variable bindings: {dataDict}")
         self.currentEnvironment = newEnv
+        self.environments.append(newEnv)
         self.totalEnvironments += 1
         self.controlStack.append(newEnv)
         self.stack.append(newEnv)
@@ -428,7 +456,9 @@ class CSEMachine:
                 else:
                     variables = [v.getValue() if isinstance(v, Token) else v for v in value.variables]
                     value = f"[lambda closure: {variables}: {value.k}]"
-            print(value)
+            else:
+                value = str(value).strip("'")
+            print(value, end="")
 
         return
 
@@ -443,70 +473,70 @@ class CSEMachine:
         while len(self.controlStack) > 0:
             #NOTE : The rule numbers are similar to the ones in the lecture note.
             if type(self.controlStack[-1]) is Token or self.controlStack[-1] in OTHER_KEYWORDS:
-                print("Rule 1")
+                #print("Rule 1")
                 self.rule1()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif type(self.controlStack[-1]) is Lambda:
-                print("Rule 2")
+                #print("Rule 2")
                 self.rule2()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) == 1:
-                print("Rule 4")
+                #print("Rule 4")
                 self.rule4()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif type(self.controlStack[-1]) is Environment:
-                print("Rule 5")
+                #print("Rule 5")
                 self.rule5()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] in BINARY_OPERATORS:
-                print("Rule 6")
+                #print("Rule 6")
                 self.rule6()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] in UNARY_OPERATORS:
-                print("Rule 7")
+                #print("Rule 7")
                 self.rule7()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] == "beta":
-                print("Rule 8")
+                #print("Rule 8")
                 self.rule8()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif type(self.controlStack[-1]) is Tau:
-                print("Rule 9")
+                #print("Rule 9")
                 self.rule9()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is list and len(self.stack[-1]) > 0:
-                print("Rule 10")
+                #print("Rule 10")
                 self.rule10()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) > 1:
-                print("Rule 11")
+                #print("Rule 11")
                 self.rule11()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is str and self.stack[-1] == "Y":
-                print("Rule 12")
+                #print("Rule 12")
                 self.rule12()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Eta:
-                print("Rule 13")
+                #print("Rule 13")
                 self.rule13()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             elif self.controlStack[-1] == "gamma" and self.stack[-1] in BUILTIN_FUNCTIONS:
-                print("Rule Builtin Function")
+                #print("Rule Builtin Function")
                 self.builtinFunction()
-                self.printStack('control')
-                self.printStack('main')
+                # self.printStack('control')
+                # self.printStack('main')
             else:
                 raise RPALException(f"Unknown control structure: {self.controlStack[-1]}")
         
