@@ -88,6 +88,22 @@ class CSGenerator:
     """
     def __init__(self):
         self.controlStructures = []
+    
+    def printControlStructures(self):
+        for cs in self.controlStructures:
+            print(f"delta {cs.number}:", end=" ")
+            for element in cs.elements:
+                if isinstance(element, Lambda):
+                    print(f"<lambda {element.k}, {element.variables}>", end=" ")
+                elif isinstance(element, Tau):
+                    print(f"<tau({element.elementNumber})>", end=" ")
+                elif isinstance(element, ControlStructure):
+                    print(f"<delta {element.number}>", end=" ")
+                elif isinstance(element, Token):
+                    print(f"<{element.value}>", end=" ")
+                else:
+                    print(f"<{element}>", end=" ")
+            print()  # New line after each control structure
         
     def getControlStructures(self):
         """
@@ -142,10 +158,12 @@ class CSGenerator:
             variable = node.child[0].head
             k = len(self.controlStructures)
             # Create a new control structure for the lambda body
+            print(f"creating control structure for lambda with k={k} {node.child[1].head}, variable={variable}")
             self.createControlStructure(k, node.child[1])
             printVariable = variable.getValue() if isinstance(variable, Token) else variable
             print(f"adding<lambda {k}, {printVariable}> to control structure {cs.number}")
             cs.elements.append(Lambda(k, variable))
+            print(f"adding<lambda {k}, {variable}> to control structure {cs.number}")
             return
         
         # Handle conditional (if-then-else) nodes
@@ -191,7 +209,8 @@ class CSGenerator:
         # Recursively add children in preorder traversal if they exist
         if node.child and len(node.child) > 0:
             self.addToControlStructure(cs, node.child[0])  
-            self.addToControlStructure(cs, node.child[1])
+            if len(node.child) > 1:
+                self.addToControlStructure(cs, node.child[1])
 
     def generate(self, node):
         """

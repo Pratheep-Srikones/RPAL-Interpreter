@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     
     with open(file_path, 'r') as file:
-        try:
+        #try:
             lines = file.readlines()
             tokens = tokenize(lines)
             # print("Tokens: ")
@@ -60,10 +60,12 @@ if __name__ == "__main__":
                 ast.trav(0)
             else:
                 print("AST has been standardized.")
+            csGenerator = CSGenerator()
+            controlStructures = csGenerator.generate(ast)
+            csGenerator.printControlStructures()
+            
 
-            controlStructures = CSGenerator().generate(ast)
-
-            primitiveEnvironment = Environment(0,variables={"Print": "print","nil" : "nil","Y":"Y"})
+            primitiveEnvironment = Environment(0,variables={"Print": "print","nil" : "nil","Y":"Y","print":"print"})
             machine = CSEMachine(controlStructures, primitiveEnvironment)
             machine.interpret()
 
@@ -73,8 +75,8 @@ if __name__ == "__main__":
 
 
 
-        except Exception as e:
-            print(f"Error: {e}")
-            sys.exit(1)
+        # except Exception as e:
+        #     print(f"Error: {e}")
+        #     sys.exit(1)
 
             

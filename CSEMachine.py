@@ -41,6 +41,59 @@ class CSEMachine:
 
         self.stack.append(self.currentEnvironment)
 
+        print("Initial Conditions:")
+        self.printStack('control')
+        self.printStack('main')
+        print(f"environment: {self.currentEnvironment.number}")
+
+    def printStack(self,stack):
+        if stack == 'control':
+            print("Control Stack:",end=" ")
+            for item in self.controlStack:
+                printable = ''
+                if type(item) is Token:
+                    printable = item.getValue()
+                elif type(item) is ControlStructure:
+                    printable = f"delta({item.number})"
+                elif type(item) is Environment:
+                    printable = f"e({item.number})"
+                elif type(item) is Lambda:
+                    if item.c is not None:
+                        printable = f"<{item.c} lambda({item.variables} {item.k})>"
+                    else:
+                        printable = f"<lambda({item.variables} {item.k})>"
+                elif type(item) is Eta:
+                    printable = f"<{item.c} eta({item.variables} {item.k})>"
+                elif type(item) is Tau:
+                    printable = f"tau({item.elementNumber})"
+                else:
+                    printable = str(item)
+                print(printable, end=",")
+        else:
+            print("Main Stack:",end=" ")
+            for item in self.stack:
+                printable = ''
+                if type(item) is Token:
+                    printable = item.getValue()
+                elif type(item) is ControlStructure:
+                    printable = f"delta({item.number})"
+                elif type(item) is Environment:
+                    printable = f"e({item.number})"
+                elif type(item) is Lambda:
+                    if item.c is not None:
+                        printable = f"<{item.c} lambda({item.variables} {item.k})>"
+                    else:
+                        printable = f"<lambda({item.variables} {item.k})>"
+                elif type(item) is Eta:
+                    printable = f"<{item.c} eta({item.variables} {item.k})>"
+                elif type(item) is Tau:
+                    printable = f"tau({item.elementNumber})"
+                else:
+                    printable = str(item)
+                print(printable, end=",")
+        print()
+
+
     def findControlStructure(self, number):
         """
         Finds and returns the control structure with the specified number.
@@ -96,6 +149,7 @@ class CSEMachine:
         """
         self.controlStack.pop()
         lambdaControl = self.stack.pop()
+        #print(f"< lambda {lambdaControl.k}, {lambdaControl.variables} > is popped from the stack")
         if (type(lambdaControl) is not Lambda):
             raise RPALException("Expected a Lambda control structure.")
         
@@ -130,7 +184,11 @@ class CSEMachine:
         Pops the environment from the control stack and removes the corresponding environment from the stack.
         """
         self.controlStack.pop()
-        self.stack.pop(-2)
+        # Traverse the stack to find and pop the first Environment object
+        for i in range(len(self.stack)-1, -1, -1):
+            if type(self.stack[i]) is Environment:
+                self.stack.pop(i)
+                break
         
         # Traverse the control stack to find the first Environment object
         nextEnv = None
@@ -266,7 +324,7 @@ class CSEMachine:
         index = self.stack.pop()
         if not isinstance(index, int):
             raise RPALException("Index must be an integer.")
-        if index < 0 or index >= len(tupleElements):
+        if index < 0 or index-1 >= len(tupleElements):
             raise RPALException("Index out of bounds for tuple elements.")
         #index adjusting RPAL uses 1-based indexing
         result = tupleElements[index-1]
@@ -356,13 +414,23 @@ class CSEMachine:
         if functionName not in BUILTIN_FUNCTIONS:
             raise RPALException(f"Unknown built-in function: {functionName}")
         
-        value = self.stack[-1]
-        if type(value) is Token:
-            value = value.getValue()
-
+        value = self.stack.pop()
+        
         if functionName == "print":
+            if type(value) is Token:
+                value = value.getValue()
+            if type(value) is Lambda:
+                if len(value.variables) == 1:
+                    variable = value.variables[0]
+                    if type(variable) is Token:
+                        variable = variable.getValue()
+                    value = f"[lambda closure: {variable}: {value.k}]"
+                else:
+                    variables = [v.getValue() if isinstance(v, Token) else v for v in value.variables]
+                    value = f"[lambda closure: {variables}: {value.k}]"
             print(value)
-            return
+
+        return
 
         
 
@@ -377,45 +445,71 @@ class CSEMachine:
             if type(self.controlStack[-1]) is Token or self.controlStack[-1] in OTHER_KEYWORDS:
                 print("Rule 1")
                 self.rule1()
+                self.printStack('control')
+                self.printStack('main')
             elif type(self.controlStack[-1]) is Lambda:
                 print("Rule 2")
                 self.rule2()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) == 1:
-                print("Rule 3")
+                print("Rule 4")
                 self.rule4()
+                self.printStack('control')
+                self.printStack('main')
             elif type(self.controlStack[-1]) is Environment:
                 print("Rule 5")
                 self.rule5()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] in BINARY_OPERATORS:
                 print("Rule 6")
                 self.rule6()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] in UNARY_OPERATORS:
                 print("Rule 7")
                 self.rule7()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] == "beta":
                 print("Rule 8")
                 self.rule8()
+                self.printStack('control')
+                self.printStack('main')
             elif type(self.controlStack[-1]) is Tau:
                 print("Rule 9")
                 self.rule9()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is list and len(self.stack[-1]) > 0:
                 print("Rule 10")
                 self.rule10()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) > 1:
                 print("Rule 11")
                 self.rule11()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is str and self.stack[-1] == "Y":
                 print("Rule 12")
                 self.rule12()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Eta:
                 print("Rule 13")
                 self.rule13()
+                self.printStack('control')
+                self.printStack('main')
             elif self.controlStack[-1] == "gamma" and self.stack[-1] in BUILTIN_FUNCTIONS:
+                print("Rule Builtin Function")
                 self.builtinFunction()
+                self.printStack('control')
+                self.printStack('main')
             else:
                 raise RPALException(f"Unknown control structure: {self.controlStack[-1]}")
         
-        result = self.stack.pop()
-        return result
-
+        
+        return 
     
