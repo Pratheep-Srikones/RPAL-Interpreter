@@ -1,8 +1,10 @@
 import sys
-from tokenizer import Token, tokenize
+from tokenizer import tokenize
 from parser import Parser
 from standardizer import StandardizeAST
 from generateCS import CSGenerator
+from Environment import Environment
+from CSEMachine import CSEMachine
 """
 Main entry for the program. Handles command-line args, reads the input file, and tokenizes its contents.
 
@@ -42,24 +44,35 @@ if __name__ == "__main__":
         #try:
             lines = file.readlines()
             tokens = tokenize(lines)
-            print("Tokens: ")
-            for token in tokens:
-                print(f'<{token.type}>: <{token.value}>')
+            # print("Tokens: ")
+            # for token in tokens:
+            #     print(f'<{token.type}>: <{token.value}>')
             par = Parser(tokens)
             ast = par.E()
-            print("*************************************************AST*************************************************")
+            
             
             if printAST:
                 ast.trav(0)
+                print()
             
-            print("*************************************************AST*************************************************")
             StandardizeAST().standardize(ast)
             if printAST:
                 ast.trav(0)
             else:
                 print("AST has been standardized.")
+            csGenerator = CSGenerator()
+            controlStructures = csGenerator.generate(ast)
+            csGenerator.printControlStructures()
+            
 
-            CSGenerator().createControlStructure(0, ast)
+            primitiveEnvironment = Environment(0,variables={"Print": "print","nil" : "nil","Y":"Y","print":"print"})
+            machine = CSEMachine(controlStructures, primitiveEnvironment)
+            machine.interpret()
+
+          
+            
+
+
 
 
         # except Exception as e:

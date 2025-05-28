@@ -1,3 +1,26 @@
+//let f x y z = x + y + z in f 1 2 3
+// let f n = n > 0 -> 3 | 2 in f 4
+
+//let f (x,y) = x+y in f (5,6)
+
+//let f x = x + 2 in f 4
+
+//let f x = x eq 0 -> 'string' | 2 in f 0
+
+//let t = (1,2,36) in t 2
+
+//(fn x y. x+y) 1 2
+
+//let a = 3 and b = 3 in a + b
+
+//let rec f n = n eq 1 -> 1 | n * f (n-1) in f 3
+
+//let x = 3 in Print(x)
+
+//let f x = x + 2 in f (4)
+
+//let x = 4 in Print(nil aug x)
+
 let rec reverse (n, x) = n gr 0 -> reverse (n/10, (x*10 + n - (n/10)*10)) | x
 	within
 		rec pali(a, b) = 
@@ -6,3 +29,14 @@ let rec reverse (n, x) = n gr 0 -> reverse (n/10, (x*10 + n - (n/10)*10)) | x
 				pali(a+1,b)						
 in
 pali(20,100)
+
+
+
+
+
+
+
+
+
+
+
