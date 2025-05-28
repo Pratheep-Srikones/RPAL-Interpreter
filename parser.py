@@ -388,7 +388,7 @@ class Parser:
             self.movenext()
             l2 = self.D()
             #print("D -> Da within D")
-            l2 = Node("within",[l1,l2])
+            return Node("within",[l1,l2])
         else:
             #print("D -> Da")
             pass
@@ -533,15 +533,17 @@ class Parser:
             
 
         
-# lines = ["let f x y z = x + y + z in f 1 2 3"]
-# tokens = tokenize(lines)
-# print("Tokens: ")
+# with open("test", 'r') as file:
+#         #try:
+#             lines = file.readlines()
+#             tokens = tokenize(lines)
+#             print("Tokens: ")
 #             # for token in tokens:
 #             #     print(f'<{token.type}>: <{token.value}>')
-# pp = Parser(tokens)
-# nn = pp.E()
-# print("**********************************************************************************************************")
-# nn.trav(0)
+#             par = Parser(tokens)
+#             ast = par.E()
+#             print("*************************************************AST*************************************************")
+#             ast.trav(0)
 
 
             
