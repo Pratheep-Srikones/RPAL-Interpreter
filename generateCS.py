@@ -122,10 +122,10 @@ class CSGenerator:
         Returns:
             ControlStructure: The newly created ControlStructure instance.
         """
-        print(f"Creating control structure with number: {number}")
+        #print(f"Creating control structure with number: {number}")
         cs = ControlStructure(number)
         self.controlStructures.append(cs)
-        print("total control structures:", len(self.controlStructures))
+        #print("total control structures:", len(self.controlStructures))
         self.addToControlStructure(cs, node)
         return cs  # Return the created control structure for reference
 
@@ -148,7 +148,7 @@ class CSGenerator:
                 # Create a new control structure for the lambda body
                 self.createControlStructure(k, node.child[1])
                 variablesToPrint = [var.head.getValue() if isinstance(var.head, Token) else var.head for var in variables]
-                print(f"adding<lambda {k}, {variablesToPrint}> to control structure {cs.number}")
+                #print(f"adding<lambda {k}, {variablesToPrint}> to control structure {cs.number}")
                 cs.elements.append(Lambda(k, [var.head for var in variables]))
                 return
 
@@ -158,53 +158,53 @@ class CSGenerator:
             variable = node.child[0].head
             k = len(self.controlStructures)
             # Create a new control structure for the lambda body
-            print(f"creating control structure for lambda with k={k} {node.child[1].head}, variable={variable}")
+            #print(f"creating control structure for lambda with k={k} {node.child[1].head}, variable={variable}")
             self.createControlStructure(k, node.child[1])
-            printVariable = variable.getValue() if isinstance(variable, Token) else variable
-            print(f"adding<lambda {k}, {printVariable}> to control structure {cs.number}")
+            #printVariable = variable.getValue() if isinstance(variable, Token) else variable
+            #print(f"adding<lambda {k}, {#printVariable}> to control structure {cs.number}")
             cs.elements.append(Lambda(k, variable))
-            print(f"adding<lambda {k}, {variable}> to control structure {cs.number}")
+            #print(f"adding<lambda {k}, {variable}> to control structure {cs.number}")
             return
         
         # Handle conditional (if-then-else) nodes
         if node.head == "->":
             if len(node.child) != 3:
                 raise RPALException("Node with head '->' must have exactly three children")
-            print("creating delta then")
+            #print("creating delta then")
             # Create control structure for 'then' branch
             deltaThen = self.createControlStructure(len(self.controlStructures), node.child[1])
-            print("creating delta else")
+            #print("creating delta else")
             # Create control structure for 'else' branch
             deltaElse = self.createControlStructure(len(self.controlStructures), node.child[2])
-            print(f"adding< detla(then){deltaThen.number}, delta(else){deltaElse.number}> to control structure {cs.number}")
+            #print(f"adding< detla(then){deltaThen.number}, delta(else){deltaElse.number}> to control structure {cs.number}")
             cs.elements.append(deltaThen)
             cs.elements.append(deltaElse)
-            print(f"adding<beta> to control structure {cs.number}")
+            #print(f"adding<beta> to control structure {cs.number}")
             cs.elements.append("beta")
 
-            print(f"calling addToControlStructure for child 0 of node with head '->' {node.child[0].head}")
+            #print(f"calling addToControlStructure for child 0 of node with head '->' {node.child[0].head}")
             # Add the condition to the control structure
             self.addToControlStructure(cs, node.child[0])
-            print(f"finished addToControlStructure for child 0 of node with head '->' {node.child[0].head}")
+            #print(f"finished addToControlStructure for child 0 of node with head '->' {node.child[0].head}")
             return
         
         # Handle tuple (tau) nodes
         if node.head == "tau":
             if len(node.child) < 2:
                 raise RPALException("Node with head 'tau' must have at least two children")
-            print(f"adding<tau({len(node.child)})> to control structure {cs.number}")
+            #print(f"adding<tau({len(node.child)})> to control structure {cs.number}")
             cs.elements.append(Tau(len(node.child)))
             # Add each child of the tuple to the control structure
             for child in node.child:
-                print(f"calling addToControlStructure for child {child.head} of node with head 'tau'")
+                #print(f"calling addToControlStructure for child {child.head} of node with head 'tau'")
                 self.addToControlStructure(cs, child)
 
             return
         
         # Handle all other nodes (e.g., operators, constants, identifiers)
         label = node.head
-        printLabel = label.getValue() if isinstance(label, Token) else label
-        print(f"adding<{printLabel}> to control structure {cs.number}")
+        #printLabel = label.getValue() if isinstance(label, Token) else label
+        #print(f"adding<{#printLabel}> to control structure {cs.number}")
         cs.elements.append(label)
         # Recursively add children in preorder traversal if they exist
         if node.child and len(node.child) > 0:

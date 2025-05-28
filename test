@@ -24,11 +24,16 @@
 //let c = 3 within f x = x + c in print(f 2)
 
 //let x = 1 in print(nil aug x)
-let Conc x y = Conc x y in
-let S = 'CIS' and T = '104B'
-and Mark = Conc 'CIS'
+let rec reverse (n, x) = n gr 0 -> reverse (n/10, (x*10 + n - (n/10)*10)) | x
+	within
+		rec pali(a, b) = 
+			b ls a -> '' |
+			reverse (a,0) eq a -> (pali(a+1,b), print(' '), print(a))|
+				pali(a+1,b)						
 in
-Print (Conc S T, S @Conc T, Mark T)
+pali(10,10000)
+
+
 
 
 

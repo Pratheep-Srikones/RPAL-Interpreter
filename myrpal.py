@@ -5,6 +5,20 @@ from standardizer import StandardizeAST
 from generateCS import CSGenerator
 from Environment import Environment
 from CSEMachine import CSEMachine
+
+PRIMITIVE_ENVIRONMENT_VARIABLES = {"Print": "print",
+                                   "nil" : "nil",
+                                   "Y":"Y",
+                                   "print":"print",
+                                   "Conc": "conc",
+                                   "Stem": "stem",
+                                   "Stern": "stern",
+                                   "Isinteger": "isInteger",
+                                   "Isstring": "isString",
+                                   "Istruthvalue": "isTruthValue",
+                                   "Isfunction": "isFunction",
+                                   "Istuple": "isTuple",
+                                   "Isdummy": "isDummy",}
 """
 Main entry for the program. Handles command-line args, reads the input file, and tokenizes its contents.
 
@@ -56,16 +70,16 @@ if __name__ == "__main__":
                 print()
             
             StandardizeAST().standardize(ast)
-            if printAST:
-                ast.trav(0)
-            else:
-                print("AST has been standardized.")
+            # if printAST:
+            #     ast.trav(0)
+            # else:
+            #     print("AST has been standardized.")
             csGenerator = CSGenerator()
             controlStructures = csGenerator.generate(ast)
-            csGenerator.printControlStructures()
+            #csGenerator.printControlStructures()
             
 
-            primitiveEnvironment = Environment(0,variables={"Print": "print","nil" : "nil","Y":"Y","print":"print"})
+            primitiveEnvironment = Environment(0,variables=PRIMITIVE_ENVIRONMENT_VARIABLES)
             machine = CSEMachine(controlStructures, primitiveEnvironment)
             machine.interpret()
 

@@ -8,6 +8,7 @@ BINARY_OPERATORS = ["+", "-", "*", "/", "eq", "gr", "ge", "ls", "le","aug"]
 UNARY_OPERATORS = ["not", "neg"]
 BUILTIN_FUNCTIONS = ['print']
 OTHER_KEYWORDS = ['nil', 'Y',"Print"]
+BUILTIN_OPERATORS = ['conc', 'stem', 'stern', 'isInteger', 'isString', 'isTruthValue', 'isFunction', 'isTuple', 'isDummy']
 
 class CSEMachine:
     """
@@ -42,10 +43,10 @@ class CSEMachine:
 
         self.stack.append(self.currentEnvironment)
 
-        print("Initial Conditions:")
-        self.printStack('control')
-        self.printStack('main')
-        print(f"environment: {self.currentEnvironment.number}")
+        #print("Initial Conditions:")
+        #self.printStack('control')
+        #self.printStack('main')
+        #print(f"environment: {self.currentEnvironment.number}")
 
     def printStack(self,stack):
         if stack == 'control':
@@ -129,6 +130,7 @@ class CSEMachine:
         and pushes the value onto the stack.
         """
         name = self.controlStack.pop()
+
         value = self.currentEnvironment.lookUpValue(name)
         self.stack.append(value)
         return
@@ -148,8 +150,62 @@ class CSEMachine:
         return
     
     def rule3(self):
-        """No need to implement rule 3 since operator handling is done by rule 6 and 7"""
-        pass
+        self.controlStack.pop()
+        print("popping gamma")
+        operator = self.stack.pop()
+        if operator == 'conc':
+            self.controlStack.pop()  # Pop 'gamma' control structure since it is a binary operation
+            print("concatenating strings")
+            value1 = self.stack.pop()
+            value2 = self.stack.pop()
+            if type(value1) is not str or type(value2) is not str:
+                raise RPALException("Both operands must be strings for 'conc' operation.")
+            result = value1.strip("'") + value2.strip("'")
+            self.stack.append(result)
+        elif operator == 'stem':
+            print("getting first character of string")
+            value = self.stack.pop()
+            if type(value) is not str:
+                raise RPALException("Operand must be a string for 'stem' operation.")
+            result = value[0] if len(value) > 0 else ''
+            self.stack.append(result)
+        elif operator == 'stern':
+            print("getting rest of string after first character")
+            value = self.stack.pop()
+            if type(value) is not str:
+                raise RPALException("Operand must be a string for 'stern' operation.")
+            result = value[1:] if len(value) > 1 else ''
+            self.stack.append(result)
+        elif operator == 'isInteger':
+            print("checking if value is an integer")
+            value = self.stack.pop()
+            result = isinstance(value, int)
+            self.stack.append(result)
+        elif operator == 'isString':
+            print("checking if value is a string")
+            value = self.stack.pop()
+            result = isinstance(value, str)
+            self.stack.append(result)
+        elif operator == 'isTruthValue':
+            print("checking if value is a truth value")
+            value = self.stack.pop()
+            result = isinstance(value, bool)
+            self.stack.append(result)
+        elif operator == 'isFunction':
+            print("checking if value is a function")
+            value = self.stack.pop()
+            result = isinstance(value, Lambda) or isinstance(value, Eta)
+            self.stack.append(result)
+        elif operator == 'isTuple':
+            print("checking if value is a tuple")
+            value = self.stack.pop()
+            result = isinstance(value, list) and len(value) > 0
+            self.stack.append(result)
+        elif operator == 'isDummy':
+            print("checking if value is a dummy token")
+            value = self.stack.pop()
+            result = isinstance(value, Token) and value.getType() == "DUMMY"
+            self.stack.append(result)
 
     def rule4(self):
         """
@@ -215,6 +271,7 @@ class CSEMachine:
             #print(f"Checking control stack item at index {i}: {self.controlStack[i]}")
             if type(self.controlStack[i]) is Environment:
                 nextEnv = self.controlStack[i]
+                #print(f"Found next environment: {nextEnv.number}")
                 break
         self.currentEnvironment = nextEnv
         #print(f"Current environment set to {self.currentEnvironment.number} after rule 5 execution.")
@@ -259,7 +316,7 @@ class CSEMachine:
                 result = [operand2]
             elif type(operand1) is list:
                 result = operand1 + [operand2]
-                
+        
 
         self.stack.append(result)
         return
@@ -315,7 +372,7 @@ class CSEMachine:
         if type(tau) is not Tau:
             raise RPALException("Expected 'tau' in control stack.")
         
-        if self.stack[-1] == "nil":
+        if len(self.stack) > 0 and self.stack[-1] == "nil":
             return
 
 
@@ -323,11 +380,15 @@ class CSEMachine:
         
         listOfElements = []
         for i in range(numberOfElements):
+            if len(self.stack) == 0:
+                return
             element = self.stack.pop()
             if type(element) is Environment:
-                raise RPALException("Cannot construct a tuple with an Environment object.")
+                return
             if type(element) is Token:
                 element = element.getValue()
+            if type(element) is str:
+                element = element.strip("'")
             listOfElements.append(element)
 
         self.stack.append(listOfElements)
@@ -447,7 +508,7 @@ class CSEMachine:
         if functionName == "print":
             if type(value) is Token:
                 value = value.getValue()
-            if type(value) is Lambda:
+            elif type(value) is Lambda:
                 if len(value.variables) == 1:
                     variable = value.variables[0]
                     if type(variable) is Token:
@@ -456,6 +517,24 @@ class CSEMachine:
                 else:
                     variables = [v.getValue() if isinstance(v, Token) else v for v in value.variables]
                     value = f"[lambda closure: {variables}: {value.k}]"
+            elif type(value) is list:
+                temp = []
+                for item in value:
+                    if type(item) is Token:
+                        temp.append(item.getValue())
+                    else:
+                        if type(item) is Lambda:
+                            if len(item.variables) == 1:
+                                variable = item.variables[0]
+                                if type(variable) is Token:
+                                    variable = variable.getValue()
+                                temp.append(f"[lambda closure: {variable}: {item.k}]")
+                            else:
+                                variables = [v.getValue() if isinstance(v, Token) else v for v in item.variables]
+                                temp.append(f"[lambda closure: {variables}: {item.k}]")
+                        else:
+                            temp.append(str(item))
+                value = "(" + ", ".join(temp) + ")"
             else:
                 value = str(value).strip("'")
             print(value, end="")
@@ -475,68 +554,73 @@ class CSEMachine:
             if type(self.controlStack[-1]) is Token or self.controlStack[-1] in OTHER_KEYWORDS:
                 #print("Rule 1")
                 self.rule1()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif type(self.controlStack[-1]) is Lambda:
                 #print("Rule 2")
                 self.rule2()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
+            elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is str and self.stack[-1] in BUILTIN_OPERATORS:
+                #print("Rule 3")
+                self.rule3()
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) == 1:
                 #print("Rule 4")
                 self.rule4()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif type(self.controlStack[-1]) is Environment:
                 #print("Rule 5")
                 self.rule5()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] in BINARY_OPERATORS:
                 #print("Rule 6")
                 self.rule6()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] in UNARY_OPERATORS:
                 #print("Rule 7")
                 self.rule7()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] == "beta":
                 #print("Rule 8")
                 self.rule8()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif type(self.controlStack[-1]) is Tau:
                 #print("Rule 9")
                 self.rule9()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is list and len(self.stack[-1]) > 0:
                 #print("Rule 10")
                 self.rule10()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Lambda and len(self.stack[-1].variables) > 1:
                 #print("Rule 11")
                 self.rule11()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is str and self.stack[-1] == "Y":
                 #print("Rule 12")
                 self.rule12()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] == "gamma" and type(self.stack[-1]) is Eta:
                 #print("Rule 13")
                 self.rule13()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             elif self.controlStack[-1] == "gamma" and self.stack[-1] in BUILTIN_FUNCTIONS:
                 #print("Rule Builtin Function")
                 self.builtinFunction()
-                # self.printStack('control')
-                # self.printStack('main')
+                #self.printStack('control')
+                #self.printStack('main')
             else:
                 raise RPALException(f"Unknown control structure: {self.controlStack[-1]}")
         

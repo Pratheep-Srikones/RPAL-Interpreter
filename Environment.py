@@ -20,7 +20,7 @@ class Environment:
         self.variables = variables if variables is not None else {}  # Variable bindings in this environment
         self.number = number  # Unique identifier for this environment
 
-    def lookUpValue(self, name):
+    def lookUpValue(self, name, line=0):
         """
         Look up the value of a variable or token in the environment chain.
 
@@ -33,7 +33,8 @@ class Environment:
         Raises:
             RPALException: If the identifier is not found in any environment.
         """
-        line = 0
+        #print(f"Looking up value for: {name} in environment {self.number}")
+        
         # If name is a Token, extract its line number and value
         if type(name) is Token:
             if name.getType() == "INT":
@@ -47,10 +48,11 @@ class Environment:
             name = name.getValue()
         # Check if the name exists in the current environment
         if name in self.variables:
+            #print(f"Found {name} in environment {self.number}")
             return self.variables[name]
         # If not found in the current environment, check the parent environment recursively
         elif self.parent is not None:
-            return self.parent.lookUpValue(name)
+            return self.parent.lookUpValue(name,line)
         # If not found in any environment, raise an exception with the line number
         else:
             raise RPALException(f"Undeclared Identifier <{name}> in line {line}")
