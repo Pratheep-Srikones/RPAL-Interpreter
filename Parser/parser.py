@@ -533,17 +533,17 @@ class Parser:
             
 
         
-# with open("test", 'r') as file:
-#         #try:
-#             lines = file.readlines()
-#             tokens = tokenize(lines)
-#             print("Tokens: ")
-#             # for token in tokens:
-#             #     print(f'<{token.type}>: <{token.value}>')
-#             par = Parser(tokens)
-#             ast = par.E()
-#             print("*************************************************AST*************************************************")
-#             ast.trav(0)
+with open("test", 'r') as file:
+        #try:
+            lines = file.readlines()
+            tokens = tokenize(lines)
+            print("Tokens: ")
+            # for token in tokens:
+            #     print(f'<{token.type}>: <{token.value}>')
+            par = Parser(tokens)
+            ast = par.E()
+            print("*************************************************AST*************************************************")
+            ast.trav(0)
 
 
             
