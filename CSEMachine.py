@@ -622,7 +622,7 @@ class CSEMachine:
                 #self.printStack('control')
                 #self.printStack('main')
             else:
-                raise RPALException(f"Unknown control structure: {self.controlStack[-1]}")
+                raise RPALException(f"Illegal Function Appication")
         
         
         return 
