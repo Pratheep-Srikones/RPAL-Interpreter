@@ -64,4 +64,4 @@ Directory structure:
 
 ---
 
-*For questions or issues, please contact prathhp231@gmail.com.*
+*For questions or issues, please contact prathhp231@gmail.com, vithurshansivanathan610@gmail.com*
