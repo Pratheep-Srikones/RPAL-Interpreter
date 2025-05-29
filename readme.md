@@ -14,7 +14,7 @@ This project is part of the Semester 4 Programming Languages course. It demonstr
 
 1. **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Pratheep-Srikones/RPAL-Interpreter.git
     ```
 2. **Navigate to the project directory:**
     ```bash
@@ -24,8 +24,7 @@ This project is part of the Semester 4 Programming Languages course. It demonstr
 
 ## Requirements
 
-- [List any required software, e.g., Python, Java, etc.]
-- [List dependencies or libraries]
+- Python
 
 ## Usage
 
