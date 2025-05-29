@@ -1,6 +1,6 @@
 from Environment.Environment import Environment
 from Exception.RPALException import RPALException
-from generateCS import ControlStructure, Eta, Lambda, Tau
+from CSE.generateCS import ControlStructure, Eta, Lambda, Tau
 from Tokenizer.tokenizer import Token
 
 # List of supported binary and unary operators
