@@ -1,10 +1,1 @@
-(let ((f (function_form (x) (+ x 1))))
-  (let ((g f))
-    (g 5)))
-
-
-g(a):
-  a = 5
-  f(a):
-    a=a+1
-  print(a)
+let T = (1,2,34) in Print(Null T)

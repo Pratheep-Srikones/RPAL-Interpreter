@@ -8,7 +8,7 @@ BINARY_OPERATORS = ["+", "-", "*", "/", "eq", "gr", "ge", "ls", "le","aug"]
 UNARY_OPERATORS = ["not", "neg"]
 BUILTIN_FUNCTIONS = ['print']
 OTHER_KEYWORDS = ['nil', 'Y',"Print"]
-BUILTIN_OPERATORS = ['conc', 'stem', 'stern', 'isInteger', 'isString', 'isTruthValue', 'isFunction', 'isTuple', 'isDummy']
+BUILTIN_OPERATORS = ['conc', 'stem', 'stern', 'isInteger', 'isString', 'isTruthValue', 'isFunction', 'isTuple', 'isDummy','order', 'null']
 
 class CSEMachine:
     """
@@ -151,11 +151,11 @@ class CSEMachine:
     
     def rule3(self):
         self.controlStack.pop()
-        print("popping gamma")
+        #print("popping gamma")
         operator = self.stack.pop()
         if operator == 'conc':
             self.controlStack.pop()  # Pop 'gamma' control structure since it is a binary operation
-            print("concatenating strings")
+            #print("concatenating strings")
             value1 = self.stack.pop()
             value2 = self.stack.pop()
             if type(value1) is not str or type(value2) is not str:
@@ -163,48 +163,64 @@ class CSEMachine:
             result = value1.strip("'") + value2.strip("'")
             self.stack.append(result)
         elif operator == 'stem':
-            print("getting first character of string")
+            #print("getting first character of string")
             value = self.stack.pop()
             if type(value) is not str:
                 raise RPALException("Operand must be a string for 'stem' operation.")
             result = value[0] if len(value) > 0 else ''
             self.stack.append(result)
         elif operator == 'stern':
-            print("getting rest of string after first character")
+            #print("getting rest of string after first character")
             value = self.stack.pop()
             if type(value) is not str:
                 raise RPALException("Operand must be a string for 'stern' operation.")
             result = value[1:] if len(value) > 1 else ''
             self.stack.append(result)
         elif operator == 'isInteger':
-            print("checking if value is an integer")
+            #print("checking if value is an integer")
             value = self.stack.pop()
             result = isinstance(value, int)
             self.stack.append(result)
         elif operator == 'isString':
-            print("checking if value is a string")
+            #print("checking if value is a string")
             value = self.stack.pop()
             result = isinstance(value, str)
             self.stack.append(result)
         elif operator == 'isTruthValue':
-            print("checking if value is a truth value")
+            #print("checking if value is a truth value")
             value = self.stack.pop()
             result = isinstance(value, bool)
             self.stack.append(result)
         elif operator == 'isFunction':
-            print("checking if value is a function")
+            #print("checking if value is a function")
             value = self.stack.pop()
             result = isinstance(value, Lambda) or isinstance(value, Eta)
             self.stack.append(result)
         elif operator == 'isTuple':
-            print("checking if value is a tuple")
+            #print("checking if value is a tuple")
             value = self.stack.pop()
             result = isinstance(value, list) and len(value) > 0
             self.stack.append(result)
         elif operator == 'isDummy':
-            print("checking if value is a dummy token")
+            #print("checking if value is a dummy token")
             value = self.stack.pop()
             result = isinstance(value, Token) and value.getType() == "DUMMY"
+            self.stack.append(result)
+        elif operator == "order":
+            value = self.stack.pop()
+            if type(value) is not list:
+                raise RPALException("Operand must be a list for 'order' operation.")
+            result = len(value)
+            self.stack.append(result)
+        elif operator == "null":
+            #print("checking if value is nil")
+            value = self.stack.pop()
+            if value == "nil":
+                result = True
+            else:
+                if type(value) is not list:
+                    raise RPALException("Operand must be a list for 'null' operation.")
+                result = (len(value) == 0)
             self.stack.append(result)
 
     def rule4(self):

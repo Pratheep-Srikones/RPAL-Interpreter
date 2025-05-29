@@ -18,7 +18,9 @@ PRIMITIVE_ENVIRONMENT_VARIABLES = {"Print": "print",
                                    "Istruthvalue": "isTruthValue",
                                    "Isfunction": "isFunction",
                                    "Istuple": "isTuple",
-                                   "Isdummy": "isDummy",}
+                                   "Isdummy": "isDummy",
+                                   "Order":"order",
+                                   "Null": "null",}
 """
 Main entry for the program. Handles command-line args, reads the input file, and tokenizes its contents.
 
