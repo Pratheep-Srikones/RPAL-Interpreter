@@ -150,6 +150,21 @@ class CSEMachine:
         return
     
     def rule3(self):
+        """
+        CSE RULE 3 Handles various unary and binary operations for the RPAL abstract machine.
+
+        This function pops an operator from the stack and applies the corresponding operation
+        to the operands on the stack. The supported operations include string concatenation,
+        string manipulation, type checking, and tuple/list operations
+
+        Raises:
+            RPALException: If operand types do not match the requirements of the operation.
+
+        Notes:
+            - For 'conc', both operands must be strings. The function strips single quotes before concatenation.
+            - For 'isTuple', only non-empty lists are considered tuples.
+            - For 'null', if the value is "nil", returns True. Otherwise, expects a list and checks if it is empty.
+        """
         self.controlStack.pop()
         #print("popping gamma")
         operator = self.stack.pop()
