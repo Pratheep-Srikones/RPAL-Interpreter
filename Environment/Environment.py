@@ -1,5 +1,5 @@
-from RPALException import RPALException
-from tokenizer import Token
+from Exception.RPALException import RPALException
+from Tokenizer.tokenizer import Token
 
 class Environment:
     """

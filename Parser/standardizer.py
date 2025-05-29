@@ -1,6 +1,6 @@
-from RPALException import RPALException
-from parser import Node
-from tokenizer import Token
+from Exception.RPALException import RPALException
+from Parser.parser import Node
+from Tokenizer.tokenizer import Token
 import copy
 
 # Utility function to check if a node has the specified label.

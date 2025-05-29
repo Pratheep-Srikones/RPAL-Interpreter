@@ -1,7 +1,7 @@
-from Environment import Environment
-from RPALException import RPALException
+from Environment.Environment import Environment
+from Exception.RPALException import RPALException
 from generateCS import ControlStructure, Eta, Lambda, Tau
-from tokenizer import Token
+from Tokenizer.tokenizer import Token
 
 # List of supported binary and unary operators
 BINARY_OPERATORS = ["+", "-", "*", "/", "eq", "gr", "ge", "ls", "le","aug"]
