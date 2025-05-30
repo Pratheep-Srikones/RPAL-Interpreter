@@ -136,7 +136,7 @@ class Parser:
             l2 = self.Tc()
             #print("Ta -> Ta aug Tc")
             flag = True
-            return Node("aug",[l1,l2])
+            l1 = Node("aug",[l1,l2])
         if not flag:
             #print("Ta -> Tc")
             pass
@@ -166,7 +166,7 @@ class Parser:
             self.movenext()
             l2 = self.Bt()
             #print("B -> B or Bt")
-            return Node("or",[l1,l2])
+            l1 =  Node("or",[l1,l2])
         #print("B-> Bt")
         return l1
     def Bt(self):
@@ -175,7 +175,7 @@ class Parser:
             self.movenext()
             l2 = self.Bs()
             #print("Bt -> Bt & Bs")
-            return Node("&",[l1,l2])
+            l1 = Node("&",[l1,l2])
         #print("Bt-> Bs")
         return l1
     def Bs(self):
@@ -278,12 +278,12 @@ class Parser:
                 self.movenext()
                 l2 = self.Af()
                 #print("At -> At * Af")
-                return Node("*",[l1,l2])
+                l1 = Node("*",[l1,l2])
             elif self.match("/"):
                 self.movenext()
                 l2 = self.Af()
                 #print("At -> At / Af")
-                return Node("/",[l1,l2])
+                l1 = Node("/",[l1,l2])
             
         #print("At -> Af")
         return l1
@@ -301,8 +301,10 @@ class Parser:
         return l1
 
     def Ap(self):
+
         l1 = self.R()
         while self.match("@"):
+            
             self.movenext()
             if self.matchtype("ID"):
                 l2 = Node(self.gettoken())
@@ -311,7 +313,9 @@ class Parser:
                 raise SyntaxError(" ID missing")
             l3 = self.R()
             #print(" Ap -> Ap @ <ID> R")
-            return Node("@",[l1,l2,l3])
+            
+            l1 =  Node("@",[l1,l2,l3])
+        
             
         
         #print("Ap -> R")
