@@ -1,1 +1,1 @@
-let f = fn n. n+1 in print(f 2)
+let Add x y = x + y in Print (2 @Add 3 @Add 4)
