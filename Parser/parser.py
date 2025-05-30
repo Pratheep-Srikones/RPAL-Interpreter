@@ -78,7 +78,7 @@ class Parser:
                 self.movenext()
             else:
                 # print(self.gettoken().value)
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value ''in''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value ''in''")
             l2 = self.E()
             #print("E -> let D in E ")
             return Node("let",[l1,l2])
@@ -97,7 +97,7 @@ class Parser:
                 #print (f"E -> fn {"Vb " * n}. E")
                 return Node("lambda",li)
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value ''.''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value ''.''")
         else:
             l1 = self.Ew()
             #print("E -> Ew")
@@ -151,7 +151,7 @@ class Parser:
             if self.match("|"):
                 self.movenext()
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value ''|''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value ''|''")
             l3 = self.Tc()
             #print("Tc -> B -> Tc | Tc")
             return Node("->",[l1,l2,l3])
@@ -311,7 +311,7 @@ class Parser:
                 l2 = Node(self.gettoken())
                 self.movenext()
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getType()  if type(self.gettoken()) is Token else "null"}'' where expected Type ''ID''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getType()  if type(self.gettoken()) is Token else 'null'}'' where expected Type ''ID''")
             l3 = self.R()
             #print(" Ap -> Ap @ <ID> R")
             
@@ -376,7 +376,7 @@ class Parser:
                 self.movenext()
                 #print( "Rn -> ( E )")
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value '')''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value '')''")
         
         elif self.matchtype("dummy"):
             l2 = Node("dummy")
@@ -384,7 +384,7 @@ class Parser:
             #print( "Rn -> dummy")
 
         else:
-            raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value ''terminals or (''")
+            raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value ''terminals or (''")
         return l2
 
     def D(self):
@@ -451,7 +451,7 @@ class Parser:
             if self.match("="):
                 self.movenext()
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value ''=''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value ''=''")
             l2 = self.E()
             #print("Db -> Vl = E")
             return Node("=",[l1,l2])
@@ -471,7 +471,7 @@ class Parser:
                 #print(f"Db -> <ID> {n*"Vb "} = E")
                 return Node("fcn_form",li)
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value ''==''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value ''==''")
         elif self.match("("):
             self.movenext()
             l1 = self.D()
@@ -480,9 +480,9 @@ class Parser:
                 #print("Db -> ( E )")
                 return l1
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value '')''")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value '')''")
         else:
-            raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected a definition ")
+            raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected a definition ")
     
     def Vb(self):
         if self.matchtype("ID"):
@@ -503,7 +503,7 @@ class Parser:
                     #print("Vb -> ( Vl )")
                     return l1
                 else:
-                    raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else "null"}'' where expected value '')'' ")
+                    raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getValue()  if type(self.gettoken()) is Token else 'null'}'' where expected value '')'' ")
         else:
             raise SyntaxError(" at grammar Vb")
 
@@ -516,7 +516,7 @@ class Parser:
             self.movenext()
             n+=1
         else:
-            raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getType()  if type(self.gettoken()) is Token else "null"}'' where expected type ''ID'' ")
+            raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getType()  if type(self.gettoken()) is Token else 'null'}'' where expected type ''ID'' ")
         
         while self.match(","):
             self.movenext()
@@ -525,8 +525,8 @@ class Parser:
                 self.movenext()
                 n+=1
             else:
-                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else "last line"}. got ''{self.gettoken().getType()  if type(self.gettoken()) is Token else "null"}'' where expected type ''ID'' ")
-        #print(f"Vl -> {n* "<ID>"}")
+                raise RPALException(f"Exception at line {self.gettoken().getLineNumber() if type(self.gettoken()) is Token else 'last line'}. got ''{self.gettoken().getType()  if type(self.gettoken()) is Token else 'null'}'' where expected type ''ID'' ")
+        #print(f"Vl -> {n* '<ID>'}")
         if(n>1):
             return Node(",",li)
         else:
@@ -536,17 +536,17 @@ class Parser:
             
 
         
-with open("test", 'r') as file:
-        #try:
-            lines = file.readlines()
-            tokens = tokenize(lines)
-            print("Tokens: ")
-            # for token in tokens:
-            #     print(f'<{token.type}>: <{token.value}>')
-            par = Parser(tokens)
-            ast = par.E()
-            print("*************************************************AST*************************************************")
-            ast.trav(0)
+# with open("test", 'r') as file:
+#         #try:
+#             lines = file.readlines()
+#             tokens = tokenize(lines)
+#             print("Tokens: ")
+#             # for token in tokens:
+#             #     print(f'<{token.type}>: <{token.value}>')
+#             par = Parser(tokens)
+#             ast = par.E()
+#             print("*************************************************AST*************************************************")
+#             ast.trav(0)
 
 
             
