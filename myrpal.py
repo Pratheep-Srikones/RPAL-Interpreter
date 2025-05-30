@@ -30,7 +30,7 @@ Main entry for the program. Handles command-line args, reads the input file, and
 
 Usage:
     python myrpal.py <file_path>
-    python myrpal.py --ast <file_path>
+    python myrpal.py -ast <file_path>
 
 Args:
     <file_path>: Path to input file.
@@ -40,6 +40,11 @@ Behavior:
     - Validates arguments.
     - Reads and prints file lines.
     - Tokenizes lines into a list.
+    - Parses tokens into an abstract syntax tree (AST).
+    - Standardizes the AST.
+    - Generates control structures from the AST.
+    - Initializes the primitive environment.
+    - Creates and runs the CSE machine interpreter.
     - Handles errors gracefully.
 """
 
