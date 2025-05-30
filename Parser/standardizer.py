@@ -265,7 +265,7 @@ class StandardizeAST:
         """
         Standardize a 'lambda' node with multiple parameters into nested 'lambda' nodes.
         """
-        self.checkNode(node, "lambda",3, forMin=True)
+        self.checkNode(node, "lambda",2, forMin=True)
         variableCount = len(node.child) - 1
         vNodes = node.child[0:variableCount]
 

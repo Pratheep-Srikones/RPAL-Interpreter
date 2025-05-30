@@ -49,13 +49,13 @@ class Tau:
 class Eta:
     def __init__(self, lambdaNode):
         """
-        Represents an eta reduction in the control structure.
-        Stores the lambda abstraction associated with this eta.
+        Represents an eta structure in the control structure.
+        Stores the lambda structure associated with this eta.
         Args:
-            lambda (Lambda): The lambda abstraction to associate with this eta.
+            lambda (Lambda): The lambda to associate with this eta.
         """
         if not isinstance(lambdaNode, Lambda):
-            raise RPALException("Eta reduction must be associated with a Lambda instance")
+            raise RPALException("Eta must be associated with a Lambda")
         self.k = lambdaNode.k
         self.variables = lambdaNode.variables
         self.c = lambdaNode.c
@@ -74,8 +74,8 @@ class Eta:
 
 class ControlStructure:
     """
-    Represents a control structure (delta) which contains a sequence of elements (instructions).
-    Each control structure has a unique number (identifier).
+    Represents a control structure (delta) which contains a sequence of structures.
+    Each control structure has a unique number.
     """
     def __init__(self, number):
         self.number = number

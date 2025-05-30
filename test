@@ -1,1 +1,1 @@
-let T = (1,2,34) in Print(Null T)
+let f = fn n. n+1 in print(f 2)

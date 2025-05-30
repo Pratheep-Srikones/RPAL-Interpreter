@@ -34,7 +34,7 @@ Usage:
 
 Args:
     <file_path>: Path to input file.
-    --ast: (Optional) Print AST.
+    -ast: (Optional) Print AST.
 
 Behavior:
     - Validates arguments.
@@ -58,11 +58,11 @@ def main():
     if len(args) == 1:
         file_path = args[0]
     elif len(args) == 2:
-        if args[0] == "--ast":
+        if args[0] == "-ast":
             printAST = True
             file_path = args[1]
         else:
-            print("Invalid argument. Use --ast to print AST.")
+            print("Invalid argument. Use -ast to print AST.")
             sys.exit(1)
 
     # Read the input file and process its contents
