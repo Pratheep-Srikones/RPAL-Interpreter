@@ -30,7 +30,7 @@ This project is part of the Semester 4 Programming Languages course. It demonstr
     ```
 2. Execute the RPAL Program and get the AST
     ```bash
-    python myrpal.py --ast filename
+    python myrpal.py -ast filename
     ```
 
 ## Project Structure
